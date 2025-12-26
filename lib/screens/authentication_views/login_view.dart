@@ -101,8 +101,10 @@ class LoginView extends StatelessWidget {
                           CustomTextField(
                             controller: controller.emailController,
                             hintText: "Enter your email",
+                            onChanged: (value) => controller.validateEmail(),
                             keyboardType: TextInputType.emailAddress,
                           ),
+                          Obx(() => Align(alignment: Alignment.centerLeft, child: _buildError(controller.emailError))),
 
                           const SizedBox(height: 16),
 
@@ -111,8 +113,10 @@ class LoginView extends StatelessWidget {
                           CustomTextField(
                             controller: controller.passwordController,
                             hintText: "Enter a valid password",
+                            onChanged: (value) => controller.validatePassword(),
                             isPassword: true,
                           ),
+                          Obx(() => Align(alignment: Alignment.centerLeft, child: _buildError(controller.passwordError))),
 
                           Align(
                             alignment: Alignment.centerRight,
@@ -135,8 +139,13 @@ class LoginView extends StatelessWidget {
                           /// 🔵 LOGIN BUTTON
                           ElevatedButton(
                             onPressed: () {
-                              controller.login();
+                            //  controller.login();
+                              if (controller.isFormValid()) {
+                                controller.login();
+                              }
                             },
+
+
                             style: ElevatedButton.styleFrom(
                               padding:
                               const EdgeInsets.symmetric(vertical: 14),
@@ -196,6 +205,14 @@ class LoginView extends StatelessWidget {
   }
 }
 
+Widget _buildError(RxString errorText) {
+  return errorText.value.isNotEmpty
+      ? Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Text(errorText.value, style: const TextStyle(color: Colors.red, fontSize: 12)),
+  )
+      : const SizedBox.shrink();
+}
 
 Widget _buildLabel(String text) {
   return Align(

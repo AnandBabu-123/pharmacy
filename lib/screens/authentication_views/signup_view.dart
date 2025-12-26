@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../controllers/signup_controller.dart';
 import '../../utilities/custom_textview.dart';
@@ -15,37 +16,7 @@ class SignUPView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-
-      /// 🌈 GRADIENT APPBAR
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF90EE90), // light green
-                Color(0xFFBBDEFB), // light blue
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: AppBar(
-            title: const Text(
-              "Sign Up",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-          ),
-        ),
-      ),
-
-      /// 🌈 BODY GRADIENT
+      
       body: Container(
         height: height,
         width: double.infinity,
@@ -65,13 +36,38 @@ class SignUPView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: (){
+                        Get.back();
+                      },
+                        child: SvgPicture.asset("assets/back_arrow.svg",)),
+
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          "SignUp",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 60,),
                 _buildLabel("Name", isMandatory: true),
                 CustomTextField(
                 controller: controller.nameController,
                   keyboardType: TextInputType.name,
                   hintText: "Enter your name",
                   maxLength: 30,
+                  onChanged: (value) => controller.validateName(),
                 ),
+                Obx(() => _buildError(controller.nameError)),
 
                 const SizedBox(height: 20),
                 _buildLabel("Phone Number"),
@@ -80,7 +76,9 @@ class SignUPView extends StatelessWidget {
                   hintText: "Enter your phone number",
                   keyboardType: TextInputType.phone,
                   maxLength: 15,
+                  onChanged: (value) => controller.validatePhoneNumber(),
                 ),
+                Obx(() => _buildError(controller.phoneError)),
 
                 const SizedBox(height: 20),
                 _buildLabel("Email Address", isMandatory: true),
@@ -89,7 +87,9 @@ class SignUPView extends StatelessWidget {
                   hintText: "Enter your email address",
                   keyboardType: TextInputType.emailAddress,
                   maxLength: 30,
+                  onChanged: (value) => controller.validateEmail(),
                 ),
+                Obx(() => _buildError(controller.emailError)),
 
                 const SizedBox(height: 20),
                 _buildLabel("Password", isMandatory: true),
@@ -97,7 +97,9 @@ class SignUPView extends StatelessWidget {
                   controller: controller.passwordController,
                   hintText: "Enter valid password",
                   isPassword: true,
+                  onChanged: (value) => controller.validatePassword(),
                 ),
+                Obx(() => _buildError(controller.passwordError)),
 
                 const SizedBox(height: 20),
                 _buildLabel("Confirm Password", isMandatory: true),
@@ -105,7 +107,9 @@ class SignUPView extends StatelessWidget {
                   controller: controller.confirmPasswordController,
                   hintText: "Confirm your password",
                   isPassword: true,
+                  onChanged: (value) => controller.validateConfirmPassword(),
                 ),
+                Obx(() => _buildError(controller.confirmPasswordError)),
 
                 const SizedBox(height: 30),
 
@@ -113,7 +117,12 @@ class SignUPView extends StatelessWidget {
                 Obx(() => controller.isLoading.value
                     ? CircularProgressIndicator()
                     : ElevatedButton(
-                  onPressed: controller.register,
+                  onPressed: (){
+                    if (controller.isFormValid()) {
+                      controller.register();
+                    }
+                  },
+                 // controller.register,
                   child: Text("Submit"),
                 )),
                 const SizedBox(height: 30),
@@ -129,6 +138,15 @@ class SignUPView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildError(RxString errorText) {
+    return errorText.value.isNotEmpty
+        ? Padding(
+      padding: EdgeInsets.only(top: 0, bottom: 10),
+      child: Text(errorText.value, style: TextStyle(color: Colors.red, fontSize: 12)),
+    )
+        : SizedBox.shrink();
   }
 
   /// LABEL

@@ -12,8 +12,37 @@ class LoginController extends GetxController{
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  var emailError ="".obs;
+  var passwordError = "".obs;
+
   final ApiCalls apiCalls = ApiCalls();
   var loading = false.obs;
+
+  void validateEmail() {
+    if (emailController.text.isEmpty) {
+      emailError.value = "Email is required";
+    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(emailController.text)) {
+      emailError.value = "Enter a valid email address";
+    } else {
+      emailError.value = "";
+    }
+  }
+
+  void validatePassword() {
+    if (passwordController.text.isEmpty) {
+      passwordError.value = "Password is required";
+    }  else {
+      passwordError.value = "";
+    }
+  }
+
+
+  bool isFormValid() {
+    validateEmail();
+    validatePassword();
+    return emailError.value.isEmpty && passwordError.value.isEmpty;
+  }
 
   Future<void> login() async {
     loading.value = true;

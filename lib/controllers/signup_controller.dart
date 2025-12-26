@@ -17,6 +17,107 @@ class SignupController extends GetxController {
 
   final ApiCalls apiCalls = ApiCalls();
 
+  var nameError = "".obs;
+  var emailError = "".obs;
+  var passwordError = "".obs;
+  var confirmPasswordError = "".obs;
+  var phoneError = "".obs;
+
+  bool isFormValid() {
+    validateName();
+    validatePhoneNumber();
+    validateEmail();
+    validatePassword();
+    validateConfirmPassword();
+
+    return nameError.value.isEmpty &&
+        phoneError.value.isEmpty &&
+        emailError.value.isEmpty &&
+        passwordError.value.isEmpty &&
+        confirmPasswordError.value.isEmpty;
+  }
+
+  void validateName() {
+    if (nameController.text.trim().isEmpty) {
+      nameError.value = "Name is required";
+    } else if (!RegExp(r"^[A-Za-z\s]+$").hasMatch(nameController.text.trim())) {
+      nameError.value = "Enter a valid name";
+    } else {
+      nameError.value = "";
+    }
+  }
+
+  void validatePhoneNumber() {
+
+    // if (phoneController.text.trim().isEmpty) {
+    //   phoneError.value = "Name is required";
+    // }  else if (phoneController.length < 10 || phoneNumber.length > 15) {
+    //   phoneError.value = "Enter a valid phone number (10–15 digits)";
+    // } else {
+    //   phoneError.value = "";
+    // }
+    //
+
+
+
+
+    final phoneNumber = phoneController.text.trim();
+
+    // If empty → no error (because it's not mandatory)
+    if (phoneNumber.isEmpty) {
+      phoneError.value = "phone number required";
+    }
+    // If not empty → check length 10–15
+    else if (phoneNumber.length < 10 || phoneNumber.length > 15) {
+      phoneError.value = "Enter a valid phone number (10–15 digits)";
+    }
+    else {
+      phoneError.value = "";
+    }
+  }
+
+  void validateEmail() {
+    if (emailController.text.isEmpty) {
+      emailError.value = "Email is required";
+    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(emailController.text)) {
+      emailError.value = "Enter a valid email address";
+    } else {
+      emailError.value = "";
+    }
+  }
+
+
+  void validatePassword() {
+    if (passwordController.text.isEmpty) {
+      passwordError.value = "Password is required";
+    } else if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&.,:;])[A-Za-z\d@$!%*#?&.,:;]{8,}$')
+        .hasMatch(passwordController.text)) {
+      passwordError.value = "Must contain uppercase, lowercase, numbers & special characters";
+    } else {
+      passwordError.value = "";
+    }
+
+    // ✅ Only validate confirm password if it's filled (prevents recursion)
+    if (confirmPasswordController.text.isNotEmpty && confirmPasswordError.value.isNotEmpty) {
+      validateConfirmPassword();
+    }
+  }
+
+  void validateConfirmPassword() {
+    if (confirmPasswordController.text.isEmpty) {
+      confirmPasswordError.value = "Confirm password is required";
+    } else if (confirmPasswordController.text != passwordController.text) {
+      confirmPasswordError.value = "Passwords do not match";
+    } else {
+      confirmPasswordError.value = "";
+    }
+
+    // ✅ Only validate password if there's an error (prevents recursion)
+    if (passwordController.text.isNotEmpty && passwordError.value.isNotEmpty) {
+      validatePassword();
+    }
+  }
+
   Future<void> register() async {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
