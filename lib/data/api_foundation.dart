@@ -18,16 +18,6 @@ class ApiFoundation {
   }
 
 
-  // static String baseUrl() {
-  //   if (kDebugMode) {
-  //     return "http://scancard.pranathiss.com:8000/apiV1/";
-  //   } else if (kProfileMode) {
-  //     return "http://scancard.pranathiss.com:8000/apiV1/";
-  //   } else {
-  //     return "http://scancard.pranathiss.com:8000/apiV1/";
-  //   }
-  // }
-
   static Future<bool> checkInternetConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
 

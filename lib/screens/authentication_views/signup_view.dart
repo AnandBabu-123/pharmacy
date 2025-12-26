@@ -1,13 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/signup_controller.dart';
 import '../../utilities/custom_textview.dart';
 import 'login_view.dart';
 
 
 class SignUPView extends StatelessWidget {
   SignUPView({super.key});
-
+  final controller = Get.put(SignupController());
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -66,6 +67,7 @@ class SignUPView extends StatelessWidget {
               children: [
                 _buildLabel("Name", isMandatory: true),
                 CustomTextField(
+                controller: controller.nameController,
                   keyboardType: TextInputType.name,
                   hintText: "Enter your name",
                   maxLength: 30,
@@ -74,6 +76,7 @@ class SignUPView extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildLabel("Phone Number"),
                 CustomTextField(
+                  controller: controller.phoneController,
                   hintText: "Enter your phone number",
                   keyboardType: TextInputType.phone,
                   maxLength: 15,
@@ -82,6 +85,7 @@ class SignUPView extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildLabel("Email Address", isMandatory: true),
                 CustomTextField(
+                  controller: controller.emailController,
                   hintText: "Enter your email address",
                   keyboardType: TextInputType.emailAddress,
                   maxLength: 30,
@@ -90,6 +94,7 @@ class SignUPView extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildLabel("Password", isMandatory: true),
                 CustomTextField(
+                  controller: controller.passwordController,
                   hintText: "Enter valid password",
                   isPassword: true,
                 ),
@@ -97,6 +102,7 @@ class SignUPView extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildLabel("Confirm Password", isMandatory: true),
                 CustomTextField(
+                  controller: controller.confirmPasswordController,
                   hintText: "Confirm your password",
                   isPassword: true,
                 ),
@@ -104,23 +110,12 @@ class SignUPView extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 /// SIGN UP BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-
+                Obx(() => controller.isLoading.value
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: controller.register,
+                  child: Text("Submit"),
+                )),
                 const SizedBox(height: 30),
 
                 /// LOGIN REDIRECT AT BOTTOM
