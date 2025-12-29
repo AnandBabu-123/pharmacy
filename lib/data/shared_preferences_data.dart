@@ -23,6 +23,7 @@ class SharedPreferencesData {
   static const String hasSeenTutorial = "hasSeenTutorial";
   static const String userType = "userType";
   static const String dashboardRole = "dashboardRole";
+  static const String storedUserIdKey = "stored_user_id";
 
   Future<void> saveAccessToken(String token) async {
     final pref = await SharedPreferences.getInstance();
@@ -60,6 +61,16 @@ class SharedPreferencesData {
   Future<String> getUserId() async {
     final pref = await SharedPreferences.getInstance();
     return pref.getString(userId) ?? "";
+  }
+
+  Future<void> saveStoredUserId(String userIdStoreId) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString(storedUserIdKey, userIdStoreId);
+  }
+
+  Future<String> getStoredUserId() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString(storedUserIdKey) ?? "";
   }
 
   Future<void> saveLoginStatus(bool logInStatus) async {

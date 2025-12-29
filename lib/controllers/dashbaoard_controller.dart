@@ -1,22 +1,238 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/api_calls.dart';
 import '../data/route_urls.dart';
 import '../data/shared_preferences_data.dart';
+import '../model/store_business_type.dart';
+import '../model/store_category.dart';
 import '../model/store_details.dart';
+import '../model/store_details_model.dart';
 
 
 class DashboardController extends GetxController {
   final ApiCalls apiCalls = ApiCalls();
   final SharedPreferencesData prefs = SharedPreferencesData();
 
+  var email = "";
   var isLoading = false.obs;
   var storeList = <Stores>[].obs;
+
+  var storeCategories = <StoreCategory>[].obs;
+  var selectedStoreCategory = Rxn<StoreCategory>();
+
+
+  var allBusinessTypes = <StoreBusinessType>[].obs;
+  var filteredBusinessTypes = <StoreBusinessType>[].obs;
+  var selectedBusinessType = Rxn<StoreBusinessType>();
+
+
+  final pincodeController = TextEditingController();
+  final stateController = TextEditingController();
+  final districtController = TextEditingController();
+  final townController = TextEditingController();
+
+  var isPincodeLoading = false.obs;
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController mobileNumberController = TextEditingController();
+  final TextEditingController alternateContactController = TextEditingController();
+  final TextEditingController OwnerAddressContactController = TextEditingController();
+  final TextEditingController gstController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController storeId = TextEditingController();
+  final TextEditingController storeName = TextEditingController();
+
+
 
   @override
   void onReady() {
     super.onReady();
     fetchStores();
+    fetchStoreCategory();
+    fetchStoreBusinessType();
+    fetchLocationFromPincode(pincodeController.text);
+    loadDetails();
   }
+
+  @override
+  void onClose() {
+    emailController.dispose();
+    userNameController.dispose();
+    mobileNumberController.dispose();
+    OwnerAddressContactController.dispose();
+    super.onClose();
+  }
+
+
+  Future<void> loadDetails() async {
+    String email = await prefs.getEmail();
+    String userName = await prefs.getName();
+    String mobileNumber = await prefs.getMobile();
+    emailController.text = email;
+    userNameController.text = userName;
+    mobileNumberController.text= mobileNumber;
+  }
+
+
+  Future<void> createStoreDetails() async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      Map<String, dynamic> data = {
+        "storeType": selectedStoreCategory.value?.storeCategoryId ?? "",
+        "id": storeId.text.trim(),
+        "name": storeName.text.trim(),
+        "pincode": pincodeController.text.trim(),
+        "district": districtController.text.trim(),
+        "gstNumber": gstController.text.trim(),
+        "location": locationController.text.trim(),
+        "town": townController.text.trim(),
+        "state": stateController.text.trim(),
+        "owner": userNameController.text.trim(),
+        "ownerAddress": OwnerAddressContactController.text.trim(),
+        "ownerContact": mobileNumberController.text.trim(),
+        "secondaryContact": alternateContactController.text.trim(),
+        "ownerEmail": emailController.text.trim(),
+        "storeVerificationStatus": "false",
+        "businessType": selectedBusinessType.value?.businessName ?? "",
+      };
+
+      print("Create Store Request Body: $data");
+
+      var response = await apiCalls.postMethod(
+        RouteUrls.createStoreDetails,
+        data,
+      );
+
+      print("Create Store Response Status: ${response.statusCode}");
+      print("Create Store Response Data: ${response.data}");
+
+      // ✅ Check response
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+        // If responseMessage exists, show it
+        if (response.data['responseMessage'] != null && response.data['responseMessage'].toString().isNotEmpty) {
+          Get.snackbar("Error", response.data['responseMessage']);
+        } else {
+          Get.snackbar("Success", "Store created successfully");
+          Get.back(); // dismiss bottom sheet
+        }
+      } else {
+        // If API failed, check if message exists
+        if (response.data != null && response.data['responseMessage'] != null) {
+          Get.snackbar("Error", response.data['responseMessage']);
+        } else {
+          Get.snackbar("Error", "Failed to create store");
+        }
+      }
+
+    } catch (e, stack) {
+      print("createStoreDetails error: $e");
+      print(stack);
+      Get.snackbar("Error", "Something went wrong");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
+
+  Future<void> fetchLocationFromPincode(String pincode) async {
+    if (pincode.length != 6) return;
+
+    try {
+      final response = await Dio().get(
+        "https://api.postalpincode.in/pincode/$pincode",
+      );
+
+      if (response.statusCode == 200 &&
+          response.data[0]['Status'] == 'Success') {
+
+        final postOffice = response.data[0]['PostOffice'][0];
+
+        stateController.text = postOffice['State'] ?? '';
+        districtController.text = postOffice['District'] ?? '';
+        townController.text = postOffice['Name'] ?? '';
+      }
+    } catch (e) {
+      print("Pincode lookup error: $e");
+    }
+  }
+
+
+
+  void onStoreCategoryChanged(StoreCategory? category) {
+    selectedStoreCategory.value = category;
+    selectedBusinessType.value = null;
+
+    if (category == null) {
+      filteredBusinessTypes.clear();
+      return;
+    }
+
+    /// If Pharmacy → show ALL business types
+    if (category.storeCategoryName == "Pharmacy") {
+      filteredBusinessTypes.assignAll(allBusinessTypes);
+    }
+    /// Else → show ONLY Retailer
+    else {
+      filteredBusinessTypes.assignAll(
+        allBusinessTypes
+            .where((e) => e.businessName == "Retailer")
+            .toList(),
+      );
+    }
+  }
+
+
+  Future<void> fetchStoreCategory() async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      final response = await apiCalls.getMethod(
+        RouteUrls.storeCategory,
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final model = StoreCategoryDetailsModel.fromJson(response.data);
+        storeCategories.assignAll(model.storeCategoriesList);
+      }
+    } catch (e) {
+      print("fetchStoreCategory error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchStoreBusinessType() async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      final response = await apiCalls.getMethod(
+        RouteUrls.storeBusinessType,
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final list = (response.data as List<dynamic>)
+            .map((e) => StoreBusinessType.fromJson(e))
+            .toList();
+
+        allBusinessTypes.assignAll(list);
+        filteredBusinessTypes.clear(); // initially empty
+      }
+    } catch (e) {
+      print("fetchStoreBusinessType error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
   Future<void> fetchStores() async {
     try {
