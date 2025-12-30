@@ -39,12 +39,25 @@ class AppDrawer extends StatelessWidget {
               Get.toNamed(AppRoutes.storeList);
             },
           ),
+          SizedBox(height: 4,),
+
+          Text("Pharmacy Management",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+
+          ListTile(
+            leading: const Icon(Icons.lock),
+            title: const Text("Add Item"),
+            onTap: () {
+              Get.toNamed(AppRoutes.addPharmacy);
+            },
+          ),
+
 
           ListTile(
             leading: const Icon(Icons.lock),
             title: const Text("Change Password"),
             onTap: () {},
           ),
+
 
           ListTile(
             leading: const Icon(Icons.logout),

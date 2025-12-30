@@ -15,5 +15,6 @@ static const String updateStoreDetails ="store/update";
 static const String uploadDocuments = "store/upload";
 static const String searchUser ="api/get-SUUsers";
 static const String updateStoreUser = "api/update-storeAndStoreUser";
+static const String getPharmacyStore = "item/get";
 
 }
