@@ -4,7 +4,9 @@ import 'package:propertysearch/screens/dash_board.dart';
 import 'package:propertysearch/screens/authentication_views/login_view.dart';
 import 'package:propertysearch/screens/authentication_views/signup_view.dart';
 import 'package:propertysearch/screens/forgot_password/forgot_password.dart';
+import 'package:propertysearch/screens/store_list.dart';
 import 'package:propertysearch/screens/update_details_screen.dart';
+import 'package:propertysearch/screens/userstore_details.dart';
 
 import '../screens/authentication_views/otp_screen.dart';
 
@@ -17,6 +19,8 @@ class AppRoutes {
   static const forgotPassword ="/forgotPassword";
    static const otpScreen ="/otpScreen";
    static const updateStoreDetails ="/updateStoreDetails";
+   static const userStoreDetails ="/userStoreDetails";
+   static const storeList = "/storeList";
 
   static final routes = [
     GetPage(name: loginView, page: () =>  LoginView(),),
@@ -26,6 +30,9 @@ class AppRoutes {
     GetPage(name: signupView, page: () => SignUPView()),
     GetPage(name: otpScreen, page: () => OtpScreen()),
     GetPage(name: updateStoreDetails, page: () => UpdateDetailsScreen()),
+    GetPage(name: userStoreDetails, page: () => UserStoreDetails()),
+    GetPage(name: storeList, page: () => StoreList()),
+
   ];
 }
 

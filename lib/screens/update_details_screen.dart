@@ -3,25 +3,10 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../controllers/dashbaoard_controller.dart';
 import '../controllers/update_details_controller.dart';
-import '../model/store_business_type.dart';
 import '../model/store_category.dart';
 import '../model/storelist_response.dart';
 
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:file_picker/file_picker.dart';
-
-// Assume these are your models/controllers
-// import 'your_controller.dart';
-// import 'store_item_model.dart';
-// import 'store_category_model.dart';
 
 class UpdateDetailsScreen extends StatelessWidget {
   const UpdateDetailsScreen({super.key});
@@ -44,9 +29,6 @@ class UpdateDetailsScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            /// -------------------------
-            /// UPDATE STORE TAB
-            /// -------------------------
             SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -245,9 +227,6 @@ class UpdateDetailsScreen extends StatelessWidget {
     );
   }
 
-  /// =============================
-  /// COMMON WIDGETS
-  /// =============================
   static InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,

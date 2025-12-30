@@ -13,6 +13,7 @@ static const String storeBusinessType = "api/adminStoreBusinessType/get";
 static const String createStoreDetails = "store/create";
 static const String updateStoreDetails ="store/update";
 static const String uploadDocuments = "store/upload";
-
+static const String searchUser ="api/get-SUUsers";
+static const String updateStoreUser = "api/update-storeAndStoreUser";
 
 }

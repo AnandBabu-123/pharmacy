@@ -25,6 +25,20 @@ class AppDrawer extends StatelessWidget {
               Get.toNamed(AppRoutes.updateStoreDetails);
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("User Store"),
+            onTap: () {
+              Get.toNamed(AppRoutes.userStoreDetails);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("Store List"),
+            onTap: () {
+              Get.toNamed(AppRoutes.storeList);
+            },
+          ),
 
           ListTile(
             leading: const Icon(Icons.lock),
