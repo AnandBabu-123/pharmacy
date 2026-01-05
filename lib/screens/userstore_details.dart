@@ -11,105 +11,44 @@ class UserStoreDetails extends StatelessWidget {
 
   final controller = Get.put(UserDetailsController());
   @override
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.transparent,
 
-        /// FULL SCREEN GRADIENT (APPBAR + BODY)
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF90EE90), // Green
-                Color(0xFF87CEFA), // Teal / Light Blue
-              ],
+        appBar: AppBar(
+          title: const Text("User Store Details"),
+          centerTitle: true,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF90EE90), // Green
+                  Color(0xFF87cefa), // Teal
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
-          child: SafeArea(
-            child: Column(
-              children: [
 
-                /// CUSTOM APPBAR WITH GRADIENT
-                _buildAppBar(),
+          // Tab bar in AppBar
+        ),
 
-                /// ROUNDED TAB BAR
-                _buildRoundedTabBar(),
-
-                /// TAB CONTENT
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _buildAddUserTab(),
-                      _buildGetUserTab(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+        body: SafeArea(
+          child: TabBarView(
+            children: [
+              _buildAddUserTab(),
+            //  _buildGetUserTab(),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // ===============================
-  // APP BAR
-  // ===============================
-  Widget _buildAppBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: const [
-          Text(
-            "User Store Details",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ===============================
-  // ROUNDED TAB BAR
-  // ===============================
-  Widget _buildRoundedTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: TabBar(
-        indicator: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        labelColor: Colors.black,
-        unselectedLabelColor: Colors.black,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-        tabs: const [
-          Tab(text: "Add User"),
-          Tab(text: "Get User"),
-        ],
-      ),
-    );
-  }
-
-  // ===============================
-  // ADD USER TAB
-  // ===============================
   Widget _buildAddUserTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),

@@ -19,10 +19,8 @@ class StoreList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: const AppDrawer(),
-
-      /// 🌈 GRADIENT APPBAR
-      appBar: AppBar(
+      appBar:
+      AppBar(
         title: const Text(
           "StoreList",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -40,19 +38,8 @@ class StoreList extends StatelessWidget {
             ),
           ),
         ),
-        leading: IconButton(
-          icon: const CircleAvatar(
-            backgroundImage: AssetImage("assets/userLogo.png"),
-            backgroundColor: Colors.white,
-          ),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
-          ),
-        ],
+
+
       ),
 
       /// 🌿 BODY BACKGROUND COLOR

@@ -21,12 +21,12 @@ class AddPharmacy extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: const AppDrawer(),
 
-      /// 🌈 GRADIENT APPBAR
+
+
       appBar: AppBar(
         title: const Text(
-          "RXWala Pharmacy",
+          "Pharmacy Management",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -42,19 +42,8 @@ class AddPharmacy extends StatelessWidget {
             ),
           ),
         ),
-        leading: IconButton(
-          icon: const CircleAvatar(
-            backgroundImage: AssetImage("assets/userLogo.png"),
-            backgroundColor: Colors.white,
-          ),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
-          ),
-        ],
+
+
       ),
 
       /// 🌿 BODY BACKGROUND COLOR

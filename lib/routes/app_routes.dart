@@ -4,6 +4,7 @@ import 'package:propertysearch/screens/dash_board.dart';
 import 'package:propertysearch/screens/authentication_views/login_view.dart';
 import 'package:propertysearch/screens/authentication_views/signup_view.dart';
 import 'package:propertysearch/screens/forgot_password/forgot_password.dart';
+import 'package:propertysearch/screens/get_store_user_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_pharmacy.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_rack_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_purchase_view.dart';
@@ -15,6 +16,7 @@ import 'package:propertysearch/screens/pharmacyStore/sales_invoice_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/search_pharmacy_user.dart';
 import 'package:propertysearch/screens/store_list.dart';
 import 'package:propertysearch/screens/update_details_screen.dart';
+import 'package:propertysearch/screens/update_store_documents_view.dart';
 import 'package:propertysearch/screens/userstore_details.dart';
 
 import '../screens/authentication_views/otp_screen.dart';
@@ -39,6 +41,8 @@ class AppRoutes {
    static const salesInVoice = "/salesInVoice";
    static const salesReport = "/salesReport";
    static const priceManage ="/priceManage";
+   static const getStoreUser = "/getStoreUser";
+   static const updateStoreDocuments ="/updateStoreDocuments";
 
 
   static final routes = [
@@ -60,6 +64,8 @@ class AppRoutes {
     GetPage(name: salesInVoice, page: () => SalesInvoiceView()),
     GetPage(name: salesReport, page: () => GetSalesReport()),
     GetPage(name: priceManage, page: () => PriceManageView()),
+    GetPage(name: getStoreUser, page: () => GetStoreUserView()),
+    GetPage(name: updateStoreDocuments, page: () => UpdateStoreDocumentsView()),
 
   ];
 }

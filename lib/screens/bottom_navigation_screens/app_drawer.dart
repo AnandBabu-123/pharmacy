@@ -35,10 +35,24 @@ class AppDrawer extends StatelessWidget {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text("Update Store Documents"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.updateStoreDocuments);
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.person),
                 title: const Text("User Store"),
                 onTap: () {
                   Get.toNamed(AppRoutes.userStoreDetails);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text("Get User Store"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.getStoreUser);
                 },
               ),
               ListTile(
@@ -100,14 +114,14 @@ class AppDrawer extends StatelessWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.file_copy),
-                title: const Text("Invoice"),
+                title: const Text("PurChase Invoice"),
                 onTap: () {
                   Get.toNamed(AppRoutes.getInvoice);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.file_copy),
-                title: const Text("PurChase InVoice"),
+                title: const Text("PurChase Report"),
                 onTap: () {
                   Get.toNamed(AppRoutes.getPurchaseReport);
                 },

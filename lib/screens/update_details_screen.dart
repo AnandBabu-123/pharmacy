@@ -20,12 +20,20 @@ class UpdateDetailsScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Update Store Details"),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: "Update Store"),
-              Tab(text: "Upload Store Docs"),
-            ],
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF90EE90), // Green
+                  Color(0xFF87cefa), // Teal
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
+
         ),
         body: TabBarView(
           children: [
@@ -157,70 +165,7 @@ class UpdateDetailsScreen extends StatelessWidget {
               ),
             ),
 
-            /// -------------------------
-            /// UPLOAD STORE DOCS TAB
-            /// -------------------------
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Select Store", style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
 
-                  Obx(() {
-                    final inactiveStores = controller.stores
-                        .where((store) =>
-                    store.status != null && store.status == "INACTIVE")
-                        .toList();
-                    return DropdownButtonFormField<StoreItem>(
-                      value: controller.selectedStore.value,
-                      items: inactiveStores.map((store) {
-                        return DropdownMenuItem<StoreItem>(
-                          value: store,
-                          child: Text("${store.id} - ${store.name}"),
-                        );
-                      }).toList(),
-                      onChanged: (store) => controller.selectedStore.value = store,
-                      decoration: _inputDecoration("Select Store"),
-                    );
-                  }),
-                  const SizedBox(height: 20),
-
-                  _buildFileUploadField(
-                    label: "Store Front Image*",
-                    selectedFile: controller.storeFrontImage,
-                    onFileSelected: (file) => controller.storeFrontImage.value = file,
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildFileUploadField(
-                    label: "Trade License*",
-                    selectedFile: controller.tradeLicense,
-                    onFileSelected: (file) => controller.tradeLicense.value = file,
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildFileUploadField(
-                    label: "Drug License*",
-                    selectedFile: controller.drugLicense,
-                    onFileSelected: (file) => controller.drugLicense.value = file,
-                  ),
-                  const SizedBox(height: 20),
-
-                  ElevatedButton(
-                    onPressed: () {
-                       controller.uploadDocuments();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: const Color(0xFF90EE90),
-                    ),
-                    child: const Text("Upload Documents"),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
