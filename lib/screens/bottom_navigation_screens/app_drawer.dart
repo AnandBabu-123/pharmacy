@@ -8,7 +8,8 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
             currentAccountPicture: const CircleAvatar(
@@ -18,39 +19,96 @@ class AppDrawer extends StatelessWidget {
             accountEmail: const Text("anand@email.com"),
           ),
 
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text("Update Store"),
-            onTap: () {
-              Get.toNamed(AppRoutes.updateStoreDetails);
-            },
+          /// STORE DETAILS (Expandable)
+          ExpansionTile(
+            leading: const Icon(Icons.store),
+            title: const Text(
+              "Store Details",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text("Update Store"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.updateStoreDetails);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text("User Store"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.userStoreDetails);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.list),
+                title: const Text("Store List"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.storeList);
+                },
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text("User Store"),
-            onTap: () {
-              Get.toNamed(AppRoutes.userStoreDetails);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text("Store List"),
-            onTap: () {
-              Get.toNamed(AppRoutes.storeList);
-            },
-          ),
-          SizedBox(height: 4,),
 
-          Text("Pharmacy Management",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
-
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text("Add Item"),
-            onTap: () {
-              Get.toNamed(AppRoutes.addPharmacy);
-            },
+          /// PHARMACY MANAGEMENT
+          ExpansionTile(
+            leading: const Icon(Icons.medical_services),
+            title: const Text(
+              "Pharmacy Management",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.add),
+                title: const Text("Add Item"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.addPharmacy);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.search),
+                title: const Text("Get Item"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.searchPharmacyUser);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: const Text("Add Rack Management"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.addRackManagement);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: const Text("Rack Management"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.getRackManagement);
+                },
+              ),
+            ],
           ),
 
+          /// PURCHASE INVOICE
+          ExpansionTile(
+            leading: const Icon(Icons.receipt),
+            title: const Text(
+              "Purchase Invoice",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.file_copy),
+                title: const Text("Invoice"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.getInvoice);
+                },
+              ),
+            ],
+          ),
+
+          const Divider(),
 
           ListTile(
             leading: const Icon(Icons.lock),
@@ -58,12 +116,11 @@ class AppDrawer extends StatelessWidget {
             onTap: () {},
           ),
 
-
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text("Logout"),
             onTap: () {
-              Get.toNamed(AppRoutes.loginView);
+              Get.offAllNamed(AppRoutes.loginView);
             },
           ),
         ],

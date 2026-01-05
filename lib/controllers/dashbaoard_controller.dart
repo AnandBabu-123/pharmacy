@@ -139,8 +139,6 @@ class DashboardController extends GetxController {
   }
 
 
-
-
   Future<void> fetchLocationFromPincode(String pincode) async {
     if (pincode.length != 6) return;
 

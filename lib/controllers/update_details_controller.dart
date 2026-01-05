@@ -36,7 +36,8 @@ class UpdateDetailsController extends GetxController {
   var tradeLicense = Rxn<File>();
   var drugLicense = Rxn<File>();
 
-
+  late final businessTypeId = selectedStoreCategory.value?.storeCategoryId;
+  late final storeVerificationStatus = selectedStore.value?.storeVerifiedStatus.toString() ?? "false";
   /// TEXT CONTROLLERS
   final storeName = TextEditingController();
   final pincodeController = TextEditingController();
@@ -177,8 +178,8 @@ class UpdateDetailsController extends GetxController {
         "ownerContact": mobileNumberController.text.trim(),
         "secondaryContact": store.secondaryContact ?? "",
         "ownerEmail": emailController.text.trim(),
-        "storeVerificationStatus": "false",
-        "businessType": selectedStoreCategory.value?.storeCategoryId,
+        "storeVerificationStatus": storeVerificationStatus, // from API
+        "businessType": businessTypeId,
       };
 
       debugPrint("📦 REQUEST BODY:");

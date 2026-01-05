@@ -5,6 +5,7 @@ import 'package:propertysearch/controllers/add_pharmacy_controller.dart';
 import '../../controllers/dashbaoard_controller.dart';
 import '../../model/store_business_type.dart';
 import '../../model/store_category.dart';
+import '../../model/user_pharmacy_model.dart' show Stores;
 import '../bottom_navigation_screens/app_drawer.dart';
 
 
@@ -12,7 +13,7 @@ import '../bottom_navigation_screens/app_drawer.dart';
 class AddPharmacy extends StatelessWidget {
   AddPharmacy({super.key});
 
-  final DashboardController controller = Get.put(DashboardController());
+
   final pharmacyController = Get.put(AddPharmacyController());
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -124,7 +125,7 @@ class AddPharmacy extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF90EE90),
         onPressed: () {
-          _openAddStoreBottomSheet();
+          _openAddStoreBottomSheet(context);
         },
         icon: const Icon(Icons.add),
         label: const Text("Add Store"),
@@ -132,445 +133,122 @@ class AddPharmacy extends StatelessWidget {
     );
   }
 
-  void _openAddStoreBottomSheet() {
-    Get.bottomSheet(
-      Container(
-        height: MediaQuery.of(Get.context!).size.height * 0.85, // 👈 CONTROL HEIGHT
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
+  void _openAddStoreBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Important for full height with keyboard
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: SingleChildScrollView( // ✅ Make it scrollable when keyboard opens
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
 
-            /// DRAG HANDLE
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(10),
+                /// 🔹 Store & Item Code
+                _buildDropdownWithTextField(
+                  leftLabel: "Stores",
+                  rightLabel: "Item Code",
+                  controller: pharmacyController,
+                  rightController: pharmacyController.itemCode,
                 ),
-              ),
-            ),
 
-            /// TITLE (FIXED)
-            const Text(
-              "Add New Store",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                const SizedBox(height: 12),
 
-            const SizedBox(height: 10),
+                /// 🔹 Item Name & Category
+                _buildTwoFieldRow(
+                  leftLabel: "Item Name",
+                  leftHint: "",
+                  leftController: pharmacyController.itemName,
+                  rightLabel: "Item Category",
+                  rightHint: "",
+                  rightController: pharmacyController.itemCategory,
+                ),
 
-            /// 🔽 SCROLLABLE CONTENT
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 12),
+
+                /// 🔹 Sub-Category & Manufacturer
+                _buildTwoFieldRow(
+                  leftLabel: "Item Sub-Category",
+                  leftHint: "",
+                  leftController: pharmacyController.itemSubCategory,
+                  rightLabel: "Manufacturer",
+                  rightHint: "",
+                  rightController: pharmacyController.manufacturer,
+                ),
+
+                const SizedBox(height: 12),
+
+                /// 🔹 Brand & GST
+                _buildTwoFieldRow(
+                  leftLabel: "Brand",
+                  leftHint: "",
+                  leftController: pharmacyController.brand,
+                  rightLabel: "GST",
+                  rightHint: "",
+                  rightController: pharmacyController.gstNumber,
+                ),
+
+                const SizedBox(height: 12),
+
+                /// 🔹 HSN Code & Is Scheduled
+                _buildTextAndYesNoDropdown(
+                  leftLabel: "HSN Code",
+                  leftController: pharmacyController.hsnCode,
+                  rightLabel: "Is Scheduled",
+                  selectedValue: pharmacyController.isScheduled,
+                ),
+
+                const SizedBox(height: 12),
+
+                /// 🔹 Scheduled Category & Is Narcotic
+                _buildTextAndYesNoDropdown(
+                  leftLabel: "Scheduled Category",
+                  leftController: pharmacyController.scheduledCategory,
+                  rightLabel: "Is Narcotic",
+                  selectedValue: pharmacyController.isNarcotic,
+                ),
+
+                const SizedBox(height: 20),
+
+                /// 🔹 Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
-                    Text(
-                      "Store Category",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
                     ),
-
-                    const SizedBox(height: 6),
-
-                    Obx(() {
-                      return DropdownButtonFormField<StoreCategory>(
-                        value: controller.selectedStoreCategory.value,
-                        items: controller.storeCategories.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Text(category.storeCategoryName ?? ""),
-                          );
-                        }).toList(),
-                        onChanged: controller.onStoreCategoryChanged,
-                        decoration: InputDecoration(
-                          hintText: "Select Store Category",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => pharmacyController.addPharmacyUser(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF90EE90),
                         ),
-                      );
-                    }),
-
-                    const SizedBox(height: 8),
-
-                    const SizedBox(height: 12),
-
-                    Text(
-                      "Business Type",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        child: const Text("Save"),
+                      ),
                     ),
-
-                    const SizedBox(height: 6),
-
-                    Obx(() {
-                      return DropdownButtonFormField<StoreBusinessType>(
-                        value: controller.selectedBusinessType.value,
-                        items: controller.filteredBusinessTypes.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type.businessName ?? ""),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          controller.selectedBusinessType.value = value;
-                        },
-                        decoration: InputDecoration(
-                          hintText: "Select Business Type",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      );
-                    }),
-
-
-                    const SizedBox(height: 10),
-
-                    _twoFieldRowStore(
-                      leftLabel: "Store Id",
-                      rightLabel: "Store Name",
-                      leftHint: "Enter Store Id",
-                      rightHint: "Enter Store Name",
-                      leftController: controller.storeId,
-                      rightController: controller.storeName,
-                      leftKeyboardType: TextInputType.number, // Number keypad
-                      rightKeyboardType: TextInputType.text,  // Normal text keypad
-                    ),
-
-
-                    _twoFieldRows(
-                      leftLabel: "PinCode",
-                      rightLabel: "Location",
-                      leftHint: "PinCode",
-                      rightHint: "Location",
-                      rightController: controller.locationController,
-                      leftController: controller.pincodeController,
-                      leftKeyboardType: TextInputType.number,
-                      leftOnChanged: (value) {
-                        if (value.length == 6) {
-                          controller.fetchLocationFromPincode(value);
-                        }
-                      },
-                    ),
-
-                    _twoFieldRows(
-                      leftLabel: "State",
-                      rightLabel: "District",
-                      leftHint: "State",
-                      rightHint: "District",
-                      leftController: controller.stateController,
-                      rightController: controller.districtController,
-                      leftReadOnly: true,
-                      rightReadOnly: true,
-                    ),
-
-                    _twoFieldRows(
-                      leftLabel: "GST",
-                      rightLabel: "Town",
-                      leftHint: "GST",
-                      rightHint: "Town",
-                      leftController: controller.gstController,
-                      rightController: controller.townController,
-                      rightReadOnly: true,
-                    ),
-
-                    _twoFieldRowConatct(
-                      leftLabel: "Store Owner",
-                      rightLabel: "Owner Address",
-                      leftHint: "Owner Name",
-                      rightHint: "Address",
-                      leftController: controller.userNameController,
-                      rightController: controller.OwnerAddressContactController,
-                      leftReadOnly: true,
-                    ),
-                    _twoFieldRowConatct(
-                      leftLabel: "Owner Contact",
-                      rightLabel: "Alternate Contact",
-                      leftHint: "Contact",
-                      rightHint: "Alternate",
-                      leftController: controller.mobileNumberController,
-                      rightController: controller.alternateContactController,
-                      leftReadOnly: true,
-                    ),
-
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      "Email",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-
-                    _buildTextField(
-                      "Email",
-                      controller: controller.emailController,
-                      readOnly: true,
-                    ),
-
-
-                    const SizedBox(height: 80),
                   ],
                 ),
-              ),
-            ),
 
-            /// ACTION BUTTONS (FIXED BOTTOM)
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Get.back(),
-                    child: const Text("Cancel"),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF90EE90),
-                    ),
-                    onPressed: () {
-                      controller.createStoreDetails();
-                    },
-                    child: const Text("Save"),
-                  ),
-                ),
+                const SizedBox(height: 16),
               ],
             ),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  Widget _twoFieldRowStore({
-    required String leftLabel,
-    required String rightLabel,
-    required String leftHint,
-    required String rightHint,
-    TextEditingController? leftController,
-    TextEditingController? rightController,
-    bool leftReadOnly = false,
-    bool rightReadOnly = false,
-    TextInputType leftKeyboardType = TextInputType.text,
-    TextInputType rightKeyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(leftLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(rightLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-              ),
-            ],
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: leftController,
-                  readOnly: leftReadOnly,
-                  keyboardType: leftKeyboardType,
-                  decoration: InputDecoration(
-                    hintText: leftHint,
-                    filled: leftReadOnly,
-                    fillColor: leftReadOnly ? Colors.grey.shade100 : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: rightController,
-                  readOnly: rightReadOnly,
-                  keyboardType: rightKeyboardType,
-                  decoration: InputDecoration(
-                    hintText: rightHint,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  Widget _twoFieldRowConatct({
-    required String leftLabel,
-    required String rightLabel,
-    required String leftHint,
-    required String rightHint,
-    TextEditingController? leftController,
-    TextEditingController? rightController,
-    bool leftReadOnly = false,
-    bool rightReadOnly = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(leftLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(rightLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: leftController,
-                  readOnly: leftReadOnly,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    hintText: leftHint,
-                    filled: leftReadOnly,
-                    fillColor:
-                    leftReadOnly ? Colors.grey.shade100 : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: rightController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    hintText: rightHint,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  Widget _twoFieldRows({
-    required String leftLabel,
-    required String rightLabel,
-    required String leftHint,
-    required String rightHint,
-    TextEditingController? leftController,
-    TextEditingController? rightController,
-    Function(String)? leftOnChanged,
-    TextInputType leftKeyboardType = TextInputType.text,
-    bool leftReadOnly = false,
-    bool rightReadOnly = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(leftLabel, style: const TextStyle(fontWeight: FontWeight.w600))),
-              const SizedBox(width: 12),
-              Expanded(child: Text(rightLabel, style: const TextStyle(fontWeight: FontWeight.w600))),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: leftController,
-                  readOnly: leftReadOnly,
-                  keyboardType: leftKeyboardType,
-                  onChanged: leftOnChanged,
-                  decoration: InputDecoration(
-                    hintText: leftHint,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: rightController,
-                  readOnly: rightReadOnly,
-                  decoration: InputDecoration(
-                    hintText: rightHint,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
-  Widget _buildTextField(
-      String hint, {
-        TextEditingController? controller,
-        bool readOnly = false,
-      }) {
-    return TextField(
-      controller: controller,
-      readOnly: readOnly,
-      decoration: InputDecoration(
-        hintText: hint,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        filled: readOnly,
-        fillColor: readOnly ? Colors.grey.shade100 : null,
-      ),
+        );
+      },
     );
   }
 
@@ -604,5 +282,235 @@ class AddPharmacy extends StatelessWidget {
       ),
     );
   }
+  Widget _buildDropdownWithTextField({
+    required String leftLabel,
+    required String rightLabel,
+    required AddPharmacyController controller,
+    required TextEditingController rightController,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+
+          /// 🔹 LEFT - DROPDOWN
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  leftLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                Obx(() {
+                  return DropdownButtonFormField<Stores>(
+                    value: controller.selectedStore.value,
+                    isExpanded: true,
+                    hint: const Text("Select Store"),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: controller.storesList.map((store) {
+                      return DropdownMenuItem<Stores>(
+                        value: store,
+                        child: Text(
+                          "${store.id ?? ""} - ${store.name ?? ""}",
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      controller.selectedStore.value = value;
+                    },
+                  );
+                }),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          /// 🔹 RIGHT - TEXTFIELD
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  rightLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: rightController,
+                  decoration: const InputDecoration(
+                    hintText: "Enter item code",
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextAndYesNoDropdown({
+    required String leftLabel,
+    required TextEditingController leftController,
+    required String rightLabel,
+    required RxnString selectedValue,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+
+          /// 🔹 LEFT - TEXTFIELD
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  leftLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: leftController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          /// 🔹 RIGHT - YES / NO DROPDOWN
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  rightLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Obx(() {
+                  return DropdownButtonFormField<String>(
+                    value: selectedValue.value,
+                    hint: const Text("Select"),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: "Y", child: Text("Yes")),
+                      DropdownMenuItem(value: "N", child: Text("No")),
+                    ],
+                    onChanged: (val) {
+                      selectedValue.value = val;
+                    },
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildTwoFieldRow({
+    required String leftLabel,
+    required String leftHint,
+    required TextEditingController leftController,
+    required String rightLabel,
+    required String rightHint,
+    required TextEditingController rightController,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+
+          /// LEFT FIELD
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  leftLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: leftController,
+                  decoration: InputDecoration(
+                    hintText: leftHint,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          /// RIGHT FIELD
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  rightLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: rightController,
+                  decoration: InputDecoration(
+                    hintText: rightHint,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
 }

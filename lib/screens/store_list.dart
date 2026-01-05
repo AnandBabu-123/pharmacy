@@ -1,13 +1,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:propertysearch/model/store_details.dart';
 import '../controllers/dashbaoard_controller.dart';
+import '../controllers/update_details_controller.dart';
+import '../model/store_category.dart';
+import '../model/storelist_response.dart';
 import 'bottom_navigation_screens/app_drawer.dart';
 
 class StoreList extends StatelessWidget {
   StoreList({super.key});
 
   final DashboardController controller = Get.put(DashboardController());
+  final updateController = Get.put(UpdateDetailsController());
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -124,8 +129,7 @@ class StoreList extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            /// call update / open bottom sheet / dialog
-                          //  controller.openUpdateStoreBottomSheet(store);
+                            _openUpdateStoreBottomSheet(context, store);
                           },
                         ),
                       ),
@@ -140,6 +144,248 @@ class StoreList extends StatelessWidget {
       ),
 
 
+    );
+  }
+
+  void _openUpdateStoreBottomSheet(
+      BuildContext context,
+      Stores store,
+      )
+  {
+    // Controllers with initial values
+    final storeIdCtrl = TextEditingController(text: store.id);
+    final categoryCtrl = TextEditingController(text: store.type);
+    final storeNameCtrl = TextEditingController(text: store.name);
+    final locationCtrl = TextEditingController(text: store.location);
+    final stateCtrl = TextEditingController(text: store.state);
+    final districtCtrl = TextEditingController(text: store.district);
+    final gstCtrl = TextEditingController(text: store.gstNumber);
+    final pincodeCtrl = TextEditingController(text: store.pincode);
+    final townCtrl = TextEditingController(text: store.district);
+    final ownerCtrl = TextEditingController(text: store.owner);
+    final ownerAddressCtrl =
+    TextEditingController(text: store.location);
+    final ownerContactCtrl =
+    TextEditingController(text: store.ownerContact);
+    final alternateContactCtrl =
+    TextEditingController(text: store.secondaryContact);
+    final emailCtrl = TextEditingController(text: store.ownerEmail);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                /// 🔹 TITLE
+                const Center(
+                  child: Text(
+                    "Update Store",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                /// 🔹 STORE + CATEGORY
+                /// 🔹 STORE ID
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Store ID*",
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Obx(() {
+                      return DropdownButtonFormField<StoreItem>(
+                        value: updateController.selectedStore.value,
+                        items: updateController.stores.map((store) {
+                          return DropdownMenuItem(
+                            value: store,
+                            child: Text("${store.id} - ${store.name}"),
+                          );
+                        }).toList(),
+                        onChanged: updateController.onStoreSelected,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 12), // spacing to next field
+                  ],
+                ),
+
+                /// 🔹 STORE CATEGORY
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Store Category*",
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Obx(() {
+                      return DropdownButtonFormField<StoreCategory>(
+                        value: controller.selectedStoreCategory.value,
+                        isExpanded: true,
+                        items: controller.storeCategories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(category.storeCategoryName ?? ""),
+                          );
+                        }).toList(),
+                        onChanged: controller.onStoreCategoryChanged,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+
+                /// 🔹 STORE NAME + LOCATION
+                _twoFieldRow(
+                  left: _labelField("Store Name*", storeNameCtrl),
+                  right: _labelField("Location*", locationCtrl),
+                ),
+
+                /// 🔹 STATE + DISTRICT
+                _twoFieldRow(
+                  left: _labelField("State*", stateCtrl),
+                  right: _labelField("District*", districtCtrl),
+                ),
+
+                /// 🔹 GST + PINCODE
+                _twoFieldRow(
+                  left: _labelField("GST Number*", gstCtrl),
+                  right: _labelField(
+                    "PinCode*",
+                    pincodeCtrl,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+
+                /// 🔹 TOWN + OWNER
+                _twoFieldRow(
+                  left: _labelField("Town*", townCtrl),
+                  right: _labelField("Store Owner*", ownerCtrl),
+                ),
+
+                /// 🔹 OWNER ADDRESS + OWNER CONTACT
+                _twoFieldRow(
+                  left: _labelField("Owner Address*", ownerAddressCtrl),
+                  right: _labelField(
+                    "Owner Contact*",
+                    ownerContactCtrl,
+                    keyboardType: TextInputType.phone,
+                  ),
+                ),
+
+                /// 🔹 ALT CONTACT + EMAIL
+                _twoFieldRow(
+                  left: _labelField(
+                    "Alternate Contact*",
+                    alternateContactCtrl,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  right: _labelField(
+                    "Email Id*",
+                    emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// 🔹 ACTION BUTTONS
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          updateController.updateStoreDetails();
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Update"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _twoFieldRow({
+    required Widget left,
+    required Widget right,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Expanded(child: left),
+          const SizedBox(width: 12),
+          Expanded(child: right),
+        ],
+      ),
+    );
+  }
+
+  Widget _labelField(
+      String label,
+      TextEditingController controller, {
+        TextInputType keyboardType = TextInputType.text,
+        bool enabled = true,
+      }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          enabled: enabled,
+          decoration: const InputDecoration(
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ],
     );
   }
 

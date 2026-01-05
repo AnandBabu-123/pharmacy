@@ -15,6 +15,12 @@ static const String updateStoreDetails ="store/update";
 static const String uploadDocuments = "store/upload";
 static const String searchUser ="api/get-SUUsers";
 static const String updateStoreUser = "api/update-storeAndStoreUser";
-static const String getPharmacyStore = "item/get";
+static const String getPharmacyStore = "api/item/get";
+static const String addpharmacyUser = "store/storeDetails";
+static const String postPharmacyUser ="api/item/add";
+static const String SearchPharmacyUser ="api/item/";
+static const String updatePharmacystore ="api/item/update";
+static const String getRackManagement = "api/rack-order/";
+static const String deleteUser = "rack-order/";
 
 }
