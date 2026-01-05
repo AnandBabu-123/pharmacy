@@ -14,6 +14,7 @@ import '../model/added_pharmacy_model.dart' hide Data;
 import '../model/get_rack_mangement.dart';
 import '../model/item_searched_model.dart';
 import '../model/pharmacy_storemodel.dart';
+import '../model/purchase_item_model.dart';
 import '../model/user_pharmacy_model.dart';
 
 import 'dart:io';
@@ -63,6 +64,8 @@ class AddPharmacyController extends GetxController {
   var searchedItems = <ItemSearchModel>[].obs;
   Timer? _debounce;
   var itemIndexes = <int>[].obs;
+
+  var purchaseList = <PurchaseItem>[].obs;
 
 
   void searchItemByName(String text) {
@@ -288,7 +291,8 @@ class AddPharmacyController extends GetxController {
     required ItemCodeMasters item,
     required String updatedItemName,
     required String updatedGst,
-  }) async {
+  }) async
+  {
     try {
       await apiCalls.initializeDio();
 
@@ -619,7 +623,8 @@ class AddPharmacyController extends GetxController {
     required String skuId,
     required String rackNumber,
     required String boxNo,
-  }) async {
+  }) async
+  {
     try {
       String accesstoken = await prefs.getAccessToken();
 
@@ -663,6 +668,36 @@ class AddPharmacyController extends GetxController {
         "Error",
         e.response?.data.toString() ?? "Request failed",
       );
+    }
+  }
+
+
+
+
+  /// 🔹 CALL API WITH SELECTED STORE
+  Future<void> getPurChaseReport(String userIdStoreId) async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      final response = await apiCalls.getMethod(
+        "${RouteUrls.purchaseReport}?userIdstoreId=$userIdStoreId",
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final json = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final List list = json['purchase'] ?? [];
+
+        purchaseList.value =
+            list.map((e) => PurchaseItem.fromJson(e)).toList();
+      }
+    } catch (e) {
+      debugPrint("❌ Purchase Report Error: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 
