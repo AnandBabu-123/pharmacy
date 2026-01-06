@@ -25,7 +25,11 @@ static const String deleteUser = "rack-order/";
 static const String purchaseReport = "purchase/report/get-purchase-invoice";
 static const String searchInVoiceItem ="stock/get-distinct-itemName";
 static const String searchInVoiceByName = "stock/get-itemCode-by-itemName-enhanced?itemName";
+static const String searchManualStockByName = "api/item/search-by-itemname";
 static const String getPriceMange = "stock/get-stock-report";
 static const String addPriceManage ="api/item-offer/add";
+static const String postsale = "sale/add";
+static const String gstReport = "purchase/gst-sale-purchase-summary";
+static const String customerManagement = "customerRegister";
 
 }

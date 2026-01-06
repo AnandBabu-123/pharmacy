@@ -41,17 +41,17 @@ class DataItem {
   final num? balQuantity;
   final num? balPackQuantity;
   final num? balLooseQuantity;
-  final String? total;
+  final num? total; // changed to num?
 
   final num? mrpPack;
   final num? mrpValue;
-  final String? purRatePerPackAfterGST;
+  final num? purRatePerPackAfterGST; // changed to num?
 
   final String? itemCategory;
   final String? onlineYesNo;
   final String? storeId;
-  final String? stockValueMrp;
-  final String? stockValuePurrate;
+  final num? stockValueMrp; // changed to num?
+  final num? stockValuePurrate; // changed to num?
 
   final String? updatedBy;
   final DateTime? updatedAt;
@@ -115,21 +115,27 @@ class DataItem {
           ? DateTime.parse(json['expiryDate'])
           : null,
 
-      balQuantity: json['balQuantity'],
-      balPackQuantity: json['balPackQuantity'],
-      balLooseQuantity: json['balLooseQuantity'],
+      balQuantity: json['balQuantity'] != null ? json['balQuantity'] as num : null,
+      balPackQuantity: json['balPackQuantity'] != null ? json['balPackQuantity'] as num : null,
+      balLooseQuantity: json['balLooseQuantity'] != null ? json['balLooseQuantity'] as num : null,
 
-      total: json['total']?.toString(),
+      total: json['total'] != null
+          ? (json['total'] is num
+          ? json['total'] as num
+          : num.tryParse(json['total'].toString()))
+          : null,
 
-      mrpPack: json['mrpPack'],
-      mrpValue: json['mrpValue'],
-      purRatePerPackAfterGST: json['purRatePerPackAfterGST'],
+      mrpPack: json['mrpPack'] != null ? json['mrpPack'] as num : null,
+      mrpValue: json['mrpValue'] != null ? json['mrpValue'] as num : null,
+      purRatePerPackAfterGST: json['purRatePerPackAfterGST'] != null
+          ? json['purRatePerPackAfterGST'] as num
+          : null,
 
       itemCategory: json['itemCategory'],
       onlineYesNo: json['onlineYesNo'],
       storeId: json['storeId'],
-      stockValueMrp: json['stockValueMrp'],
-      stockValuePurrate: json['stockValuePurrate'],
+      stockValueMrp: json['stockValueMrp'] != null ? json['stockValueMrp'] as num : null,
+      stockValuePurrate: json['stockValuePurrate'] != null ? json['stockValuePurrate'] as num : null,
 
       updatedBy: json['updatedBy'],
       updatedAt: json['updatedAt'] != null
@@ -140,10 +146,10 @@ class DataItem {
       userIdStoreIdItemCode: json['userIdStoreIdItemCode'],
       userIdStoreId: json['userIdStoreId'],
 
-      igstCode: json['igstCode'],
-      minOrderQty: json['minOrderQty'],
-      offerQty: json['offerQty'],
-      discount: json['discount'],
+      igstCode: json['igstCode'] != null ? json['igstCode'] as num : null,
+      minOrderQty: json['minOrderQty'] != null ? json['minOrderQty'] as num : null,
+      offerQty: json['offerQty'] != null ? json['offerQty'] as num : null,
+      discount: json['discount'] != null ? json['discount'] as num : null,
 
       brandName: json['brandName'],
       purchaseDate: json['purchaseDate'],
@@ -193,5 +199,6 @@ class DataItem {
     };
   }
 }
+
 
 

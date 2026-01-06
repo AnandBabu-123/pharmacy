@@ -4,7 +4,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:propertysearch/controllers/manual_stock_item_form.dart';
 import 'package:propertysearch/controllers/sales_item_form.dart';
+import 'package:propertysearch/model/gst_report_model.dart';
+import 'package:propertysearch/model/manual_stock_model.dart';
 import 'package:propertysearch/model/price_manage_model.dart';
 
 import '../data/api_calls.dart';
@@ -26,14 +29,20 @@ class SalesInVoiceController extends GetxController{
       <EditablePriceItem>[].obs;
 
 
+  RxList<SaleGst> saleGstList = <SaleGst>[].obs;
+  RxList<PurchaseGst> purchaseGstList = <PurchaseGst>[].obs;
 
   final SharedPreferencesData prefs = SharedPreferencesData();
   var customerNameController = TextEditingController();
   var customerPhoneController = TextEditingController();
 
   var itemForms = <SalesItemForm>[].obs;
+
   var itemSearchList = <String>[].obs;
   late Dio dio;
+
+  var manualItemForms = <ManualStockItemForm>[].obs;
+  var itemSearchLists = <String>[].obs;
 
   void addItem() {
     itemForms.add(SalesItemForm());
@@ -45,6 +54,16 @@ class SalesInVoiceController extends GetxController{
     }
   }
 
+  void addItems() {
+    manualItemForms.add(ManualStockItemForm());
+  }
+
+  void removeItems(int index) {
+    if (index != 0) {
+      manualItemForms.removeAt(index);
+    }
+  }
+
 
   @override
   void onReady() {
@@ -52,8 +71,176 @@ class SalesInVoiceController extends GetxController{
     getPharmacyDropDown();
     searchItem();
     addItem();
-
+    addItems();
   }
+
+  Future<void> gstReport() async {
+    try {
+      isLoading.value = true;
+
+      final store = selectedStore.value;
+      if (store == null) {
+        Get.snackbar("Error", "Please select a store");
+        return;
+      }
+
+      await apiCalls.initializeDio();
+
+      final url =
+          "${RouteUrls.gstReport}?userIdStoreId=${store.userIdStoreId}";
+
+      debugPrint("➡ GST API: $url");
+
+      final response = await apiCalls.getMethod(url);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final json = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final model = GSTReportModel.fromJson(json);
+
+        /// 🔥 STORE BOTH LISTS
+        saleGstList.value = model.saleGst ?? [];
+        purchaseGstList.value = model.purchaseGst ?? [];
+
+        debugPrint("✅ Sale GST: ${saleGstList.length}");
+        debugPrint("✅ Purchase GST: ${purchaseGstList.length}");
+      }
+    } catch (e, s) {
+      debugPrint("❌ GST Report Error: $e");
+      debugPrint("$s");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
+  bool validateAll() {
+    if (selectedStore.value == null) {
+      Get.snackbar("Error", "Please select store");
+      return false;
+    }
+
+    if (customerNameController.text.isEmpty ||
+        customerPhoneController.text.isEmpty) {
+      Get.snackbar("Error", "Enter customer details");
+      return false;
+    }
+
+    for (var form in itemForms) {
+      for (var entry in form.fields.entries) {
+        if (entry.value.text.trim().isEmpty) {
+          Get.snackbar("Error", "${entry.key} is required");
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  Future<void> postSale() async {
+    if (!validateAll()) return;
+
+    try {
+      isLoading.value = true;
+
+      final store = selectedStore.value!;
+      final accessToken = await prefs.getAccessToken();
+
+      /// 🔹 BUILD ITEMS ARRAY (MATCH API FORMAT)
+      final List<Map<String, dynamic>> detailRequests =
+      itemForms.map((f) {
+        return {
+          "catName": "BRAND", // or f.brand.text if backend accepts dynamic
+          "itemSubCategory": "TAB",
+          "itemCode": f.itemCode.text,
+          "itemName": f.itemName.text,
+          "mfacName": f.manufacturer.text,
+          "brandName": f.brand.text,
+          "batchNo": f.batch.text,
+          "expiryDate": f.expiryDate.text, // "" allowed
+
+          // ---- NUMBERS AS INT ----
+          "mrp": int.tryParse(f.mrp.text) ?? 0,
+
+          // ---- STRING ----
+          "discPerct": f.discount.text, // API wants string
+
+          // ---- NUMBERS AS INT ----
+          "afterDiscount": int.tryParse(f.afterDiscount.text) ?? 0,
+          "igstper": int.tryParse(f.IGST.text) ?? 0,
+          "sgstper": int.tryParse(f.SGST.text) ?? 0,
+          "cgstper": int.tryParse(f.CGST.text) ?? 0,
+
+          "igstamt": int.tryParse(f.IGSTAmount.text) ?? 0,
+          "sgstamt": int.tryParse(f.SGSTAmount.text) ?? 0,
+          "cgstamt": int.tryParse(f.CGSTAmount.text) ?? 0,
+
+          "total": int.tryParse(f.FinalSalePrice.text) ?? 0,
+          "totalPurchasePrice":
+          int.tryParse(f.TotalPurchasePrice.text) ?? 0,
+          "profitOrLoss":
+          int.tryParse(f.ProfitOrLoss.text) ?? 0,
+
+          // ---- STRING ----
+          "qtyBox": f.BoxQuantity.text,
+        };
+      }).toList();
+
+      /// 🔹 FINAL BODY (MATCH API)
+      final Map<String, dynamic> body = {
+        "storeId": store.id,
+        "custCode":
+        int.tryParse(customerPhoneController.text) ?? 0,
+        "custName": customerNameController.text,
+        "detailRequests": detailRequests,
+      };
+
+      debugPrint("➡ SALE REQUEST BODY: $body");
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: "http://3.111.125.81/",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      final response = await dio.post("sale/add", data: body);
+
+      debugPrint("➡ STATUS: ${response.statusCode}");
+      debugPrint("➡ RESPONSE: ${response.data}");
+
+      if (response.statusCode == 200) {
+        Get.snackbar("Success", "Sale invoice saved");
+
+        /// 🔹 RESET FORM
+        itemForms.clear();
+        addItem();
+        customerNameController.clear();
+        customerPhoneController.clear();
+      } else {
+        Get.snackbar("Error", "Save failed");
+      }
+    } on DioException catch (e) {
+      debugPrint("❌ STATUS: ${e.response?.statusCode}");
+      debugPrint("❌ DATA: ${e.response?.data}");
+      debugPrint("❌ MESSAGE: ${e.message}");
+      Get.snackbar("Error", "API Error");
+    } catch (e, s) {
+      debugPrint("❌ ERROR: $e");
+      debugPrint("STACK: $s");
+      Get.snackbar("Error", "Unexpected Error");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
   Future<void> submitOffers() async {
     final selectedItems =
@@ -167,40 +354,6 @@ class SalesInVoiceController extends GetxController{
     }
   }
 
-  // Future<void> getPriceMange() async {
-  //   try {
-  //     final store = selectedStore.value;
-  //     if (store == null) return;
-  //
-  //
-  //
-  //     await apiCalls.initializeDio();
-  //
-  //     final response = await apiCalls.getMethod(
-  //       "${RouteUrls.getPriceMange}"
-  //           "?storeId=${store.id}"
-  //           "&userIdStoreId=${store.userIdStoreId}"
-  //           "&userId=${store.userId}",
-  //     );
-  //
-  //     if (response.statusCode == 200 && response.data != null) {
-  //       final json = response.data is String
-  //           ? jsonDecode(response.data)
-  //           : response.data;
-  //
-  //       final model = PriceManageModel.fromJson(json);
-  //
-  //       priceList.value = model.data ?? [];
-  //     }
-  //   } catch (e, s) {
-  //     debugPrint("Price Manage Error: $e");
-  //     debugPrint("$s");
-  //   } finally {
-  //
-  //   }
-  // }
-
-
   Future<void> searchItem() async {
     try {
       await apiCalls.initializeDio();
@@ -270,6 +423,78 @@ class SalesInVoiceController extends GetxController{
     }
   }
 
+
+  Future<void> searchItemByNames(
+      String itemName,
+      ManualStockItemForm form,
+      ) async
+  {
+    try {
+      await apiCalls.initializeDio();
+
+      final response = await apiCalls.getMethod(
+          "${RouteUrls.searchManualStockByName}?itemName=$itemName"
+
+
+      );
+      debugPrint("⬅ Status Codssse: ${response.statusCode}");
+      debugPrint("⬅ Responsessss: ${response.data}");
+      if (response.statusCode == 200 && response.data != null) {
+        final json = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final List list = json['data'] ?? [];
+
+        /// 🔴 If API returns nothing → clear fields
+        if (list.isEmpty) {
+          form.clear();
+          form.itemName.text = itemName;
+          return;
+        }
+
+        final item = ManualStockModel.fromJson(list.first);
+
+        /// ✅ SAFE AUTO FILL (null → "")
+        form.itemName.text = item.itemName ?? itemName;
+        form.itemCode.text = item.itemCode ?? "";
+        form.manufacturer.text = item.manufacturer ?? "";
+        // form.manufacturerName.text = item.mfName ?? "";
+        // form.supplier.text = item.supplierName ?? "";
+        // form.rack.text = item.rack ?? "";
+        // form.batch.text = item.batch ?? "";
+        //
+        // form.balQty.text = item.balQuantity?.toString() ?? "";
+        // form.balPackQty.text = item.balPackQuantity?.toString() ?? "";
+        // form.balLoose.text = item.balLooseQuantity?.toString() ?? "";
+        //
+        // form.mrpPack.text = item.mrpPack?.toString() ?? "";
+        // form.purRate.text = item.purRatePerPackAfterGST?.toString() ?? "";
+        // form.mrpValue.text = item.mrpValue?.toString() ?? "";
+        //
+        // form.category.text = item.itemCategory ?? "";
+        // form.online.text = item.onlineYesNo ?? "";
+        //
+        // form.stockValueMRP.text = item.stockValueMrp?.toString() ?? "";
+        // form.stockValuePurRate.text =
+        //     item.stockValuePurrate?.toString() ?? "";
+        //
+        // if (item.expiryDate != null) {
+        //   form.expiryDate.text =
+        //       item.expiryDate!.toIso8601String().split('T').first;
+        // } else {
+        //   form.expiryDate.clear();
+        // }
+      }
+    } catch (e, s) {
+      debugPrint("Item Search Error: $e");
+      debugPrint("$s");
+
+      /// if error → don’t crash, just clear
+      form.clear();
+      form.itemName.text = itemName;
+    }
+  }
 
 
   Future<void> getPharmacyDropDown() async {

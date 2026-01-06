@@ -7,13 +7,17 @@ import 'package:propertysearch/screens/forgot_password/forgot_password.dart';
 import 'package:propertysearch/screens/get_store_user_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_pharmacy.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_rack_management.dart';
+import 'package:propertysearch/screens/pharmacyStore/custore_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_purchase_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_rock_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_sales_report.dart';
+import 'package:propertysearch/screens/pharmacyStore/gst_report_view.dart';
+import 'package:propertysearch/screens/pharmacyStore/manual_stock_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/price_manage_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/purcahse_invoice_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/sales_invoice_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/search_pharmacy_user.dart';
+import 'package:propertysearch/screens/pharmacyStore/stock_report_view.dart';
 import 'package:propertysearch/screens/store_list.dart';
 import 'package:propertysearch/screens/update_details_screen.dart';
 import 'package:propertysearch/screens/update_store_documents_view.dart';
@@ -43,6 +47,10 @@ class AppRoutes {
    static const priceManage ="/priceManage";
    static const getStoreUser = "/getStoreUser";
    static const updateStoreDocuments ="/updateStoreDocuments";
+   static const stockReport= "/stockReport";
+   static const manualStock ="/manualStock";
+   static const gstReport ="/gstReport";
+   static const customerManagement = "/customerManagement";
 
 
   static final routes = [
@@ -66,6 +74,10 @@ class AppRoutes {
     GetPage(name: priceManage, page: () => PriceManageView()),
     GetPage(name: getStoreUser, page: () => GetStoreUserView()),
     GetPage(name: updateStoreDocuments, page: () => UpdateStoreDocumentsView()),
+    GetPage(name: stockReport, page: () => StockReportView()),
+    GetPage(name: manualStock, page: () => ManualStockView()),
+    GetPage(name: gstReport, page: () => GstReportView()),
+    GetPage(name: customerManagement, page: () => CustomerManagement()),
 
   ];
 }

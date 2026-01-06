@@ -142,6 +142,36 @@ class AppDrawer extends StatelessWidget {
                   Get.toNamed(AppRoutes.priceManage);
                 },
               ),
+
+              ListTile(
+                leading: const Icon(Icons.list),
+                title: const Text("Stock Report"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.stockReport);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: const Text("Manual Stock"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.manualStock);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: const Text("GST Report"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.gstReport);
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: const Text("Customer Management"),
+                onTap: () {
+                  Get.toNamed(AppRoutes.customerManagement);
+                },
+              ),
             ],
           ),
 

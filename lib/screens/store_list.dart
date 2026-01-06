@@ -19,8 +19,7 @@ class StoreList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar:
-      AppBar(
+      appBar: AppBar(
         title: const Text(
           "StoreList",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -30,15 +29,14 @@ class StoreList extends StatelessWidget {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Color(0xFF90EE90), // Green
-                Color(0xFF87cefa), // Teal
+                Color(0xFF90EE90),
+                Color(0xFF87cefa),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
-
 
       ),
 
