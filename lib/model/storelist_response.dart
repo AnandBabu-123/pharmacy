@@ -36,19 +36,15 @@ class StoreItem {
   final String id;
   final String name;
   final String userIdStoreId;
-
   final String pincode;
   final String district;
   final String state;
   final String location;
-
   final String owner;
   final String ownerContact;
   final String secondaryContact;
   final String ownerEmail;
-
   final String gstNumber;
-
   final String? status;              // ACTIVE / INACTIVE / null
   final String storeVerifiedStatus;  // true / false
   final String storeBusinessType;    // RT / DT / PC / PH

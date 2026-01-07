@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:image_picker/image_picker.dart';
 import '../controllers/update_details_controller.dart';
 import '../model/storelist_response.dart';
 import 'package:file_picker/file_picker.dart';
@@ -47,20 +48,19 @@ class UpdateStoreDocumentsView extends StatelessWidget {
             const SizedBox(height: 6),
 
             Obx(() {
-              final inactiveStores = controller.stores
-                  .where((store) => store.status == "INACTIVE")
+              final verifiedStores = controller.stores
+                  .where((store) => store.storeVerifiedStatus == "true")
                   .toList();
 
               return DropdownButtonFormField<StoreItem>(
                 value: controller.selectedStore.value,
-                items: inactiveStores.map((store) {
+                items: verifiedStores.map((store) {
                   return DropdownMenuItem<StoreItem>(
                     value: store,
                     child: Text("${store.id} - ${store.name}"),
                   );
                 }).toList(),
-                onChanged: (store) =>
-                controller.selectedStore.value = store,
+                onChanged: controller.onStoreSelected, // keep your logic
                 decoration: _inputDecoration("Select Store"),
               );
             }),
@@ -141,23 +141,12 @@ class UpdateStoreDocumentsView extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
+
         Obx(() {
           return GestureDetector(
-            onTap: () async {
-              // Open file picker for any document type
-              final result = await FilePicker.platform.pickFiles(
-                allowMultiple: false,
-                type: FileType.any, // allows any file type
-              );
-
-              if (result != null && result.files.isNotEmpty) {
-                final filePath = result.files.first.path;
-                if (filePath != null) {
-                  final file = File(filePath);
-                  onFileSelected(file); // update the Rxn<File>
-                }
-              }
-            },
+            onTap: () => _showPickDialog(
+              onFileSelected: onFileSelected,
+            ),
             child: Container(
               height: 50,
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -176,4 +165,53 @@ class UpdateStoreDocumentsView extends StatelessWidget {
       ],
     );
   }
+  void _showPickDialog({required Function(File) onFileSelected}) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () async {
+                Get.back();
+                final picker = ImagePicker();
+                final picked =
+                await picker.pickImage(source: ImageSource.camera);
+
+                if (picked != null) {
+                  onFileSelected(File(picked.path));
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder),
+              title: const Text("Files (Drive / Mobile)"),
+              onTap: () async {
+                Get.back();
+                final result = await FilePicker.platform.pickFiles(
+                  allowMultiple: false,
+                  type: FileType.any,
+                );
+
+                if (result != null && result.files.isNotEmpty) {
+                  final path = result.files.first.path;
+                  if (path != null) {
+                    onFileSelected(File(path));
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
 }

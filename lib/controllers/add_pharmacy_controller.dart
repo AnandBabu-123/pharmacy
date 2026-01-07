@@ -102,8 +102,6 @@ class AddPharmacyController extends GetxController {
         debugPrint("📥 Upload Response: ${response.data}");
 
 
-
-
         final List list = response.data;
 
         searchedItems.value =
@@ -219,10 +217,14 @@ class AddPharmacyController extends GetxController {
 
     if (result != null) {
       selectedFiles.assignAll(
-        result.files.map((e) => File(e.path!)).toList(),
+        result.files
+            .where((e) => e.path != null)
+            .map((e) => File(e.path!))
+            .toList(),
       );
     }
   }
+
 
   Future<void> uploadItemDocuments(String userIdStoreIdItemCode) async {
     try {
@@ -232,24 +234,42 @@ class AddPharmacyController extends GetxController {
       }
 
       isUploading.value = true;
-
       final accessToken = await prefs.getAccessToken();
 
       final formData = d.FormData();
+      int index = 1;
 
-      for (int i = 0; i < selectedFiles.length; i++) {
+      // Add real files
+      for (final file in selectedFiles) {
         formData.files.add(
           MapEntry(
-            "image${i == 0 ? "" : i}",
+            "image$index",
             await d.MultipartFile.fromFile(
-              selectedFiles[i].path,
-              filename: selectedFiles[i].path.split('/').last,
+              file.path,
+              filename: file.path.split('/').last,
             ),
           ),
         );
+        index++;
       }
 
+      // Ensure at least 2 images
+      while (index <= 2) {
+        // Create a temporary empty file
+        final tempFile = File('${Directory.systemTemp.path}/empty_$index.txt');
+        if (!tempFile.existsSync()) tempFile.writeAsStringSync("");
 
+        formData.files.add(
+          MapEntry(
+            "image$index",
+            await d.MultipartFile.fromFile(
+              tempFile.path,
+              filename: 'empty_$index.txt',
+            ),
+          ),
+        );
+        index++;
+      }
 
       final dio = d.Dio(
         d.BaseOptions(
@@ -258,33 +278,46 @@ class AddPharmacyController extends GetxController {
             "Authorization": "Bearer $accessToken",
             "Accept": "application/json",
           },
+          contentType: "multipart/form-data",
+          validateStatus: (status) => status != null && status < 600,
         ),
       );
 
       final response = await dio.post(
         "api/item/item-code-master-image",
-        queryParameters: {
-          "userIdStoreIdItemCode": userIdStoreIdItemCode,
-        },
+        queryParameters: {"userIdStoreIdItemCode": userIdStoreIdItemCode},
         data: formData,
       );
 
-      debugPrint("📥 Upload Response: ${response.data}");
+      debugPrint("📥 Upload Response: ${response.statusCode}");
+      debugPrint("📥 Upload Body: ${response.data}");
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar("Success", "Files uploaded successfully");
         selectedFiles.clear();
       } else {
-        Get.snackbar("Error", "Upload failed");
+        Get.snackbar(
+          "Upload Failed",
+          response.data?['message'] ?? "Server error",
+        );
       }
-    } catch (e, s) {
+    } on d.DioException catch (e) {
+      debugPrint("❌ Upload Dio error: ${e.response?.data}");
+      Get.snackbar(
+        "Upload Failed",
+        e.response?.data?['message'] ?? "Server error",
+      );
+    } catch (e) {
       debugPrint("❌ Upload error: $e");
-      debugPrint("$s");
       Get.snackbar("Error", "Something went wrong");
     } finally {
       isUploading.value = false;
     }
   }
+
+
+
+
 
 
   Future<void> updatePharmacyStore({

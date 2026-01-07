@@ -184,13 +184,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("Store ID: ${item.data.storeId ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("Manufacturer: ${item.data.manufacturer ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
@@ -202,13 +202,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("Item Code: ${item.data.itemCode ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("Item Name: ${item.data.itemName ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
@@ -220,13 +220,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("Expiry Date: ${formatDate(item.data.expiryDate)}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("Balance Qty: ${item.data.balQuantity ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
@@ -238,13 +238,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("Bal Pack Quantity: ${item.data.balPackQuantity ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("Bal Loose Quantity: ${item.data.balLooseQuantity ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
@@ -256,13 +256,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("MRP Pack: ${item.data.mrpPack ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("MRP Value: ${item.data.mrpValue ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
@@ -274,13 +274,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("Rack: ${item.data.rack ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("Online (Y/N): ${item.data.onlineYesNo ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
@@ -292,13 +292,13 @@ class PriceManageView extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text("Updated At: ${formatDate(item.data.updatedAt)}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),
                                     Expanded(
                                       child: Text("Updated By: ${item.data.updatedBy ?? "-"}",style: TextStyle(
-                                        fontSize: 11.0, // specify the font size in double
+                                        fontSize: 12.0, // specify the font size in double
                                         color: Colors.black, // optional: text color
                                       ),),
                                     ),

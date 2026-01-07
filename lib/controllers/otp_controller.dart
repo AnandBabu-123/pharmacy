@@ -36,9 +36,10 @@ class OtpController extends GetxController {
 
       Map<String, dynamic> data = {
         "email": email,
+        "isForgetPassword": "false"
       };
 
-      var response = await apiCalls.postMethod(RouteUrls.verifyEmailOTP, data);
+      var response = await apiCalls.postMethod(RouteUrls.sendEmailOTP, data);
 
       print("✅ EMAIL OTP SENT RESPONSE: ${response.data}");
       Get.snackbar("Success", "OTP sent to $email");
@@ -58,8 +59,8 @@ class OtpController extends GetxController {
       print("📤 VERIFY EMAIL OTP → $email | OTP: $emailOtp");
 
       Map<String, dynamic> data = {
-        "email": email,
         "otp": emailOtp,
+        "email": email,
       };
 
       var response = await apiCalls.postMethod(RouteUrls.verifyEmailOTP, data);

@@ -7,7 +7,7 @@ import '../data/api_calls.dart';
 import '../data/route_urls.dart';
 import '../utilities/snack_bar_view.dart';
 
-class CustomerManagemetController extends GetxController {
+class CustomerManagementController extends GetxController {
 
   final nameController = TextEditingController();
   final locationController = TextEditingController();
@@ -28,10 +28,7 @@ class CustomerManagemetController extends GetxController {
       SnackBarView.showErrorMessage("Location is required");
       return false;
     }
-    if (addressController.text.trim().isEmpty) {
-      SnackBarView.showErrorMessage("Address is required");
-      return false;
-    }
+
     if (contactController.text.trim().isEmpty) {
       SnackBarView.showErrorMessage("Contact is required");
       return false;
@@ -61,24 +58,29 @@ class CustomerManagemetController extends GetxController {
       final response =
       await apiCalls.postMethod(RouteUrls.customerManagement, data);
 
-      if (response.data != null) {
-        final json = response.data is String
-            ? jsonDecode(response.data)
-            : response.data;
+      if (response == null) {
+        SnackBarView.showErrorMessage("No response from server");
+        return;
+      }
 
-        final bool status = json["status"] ?? false;
-        final String message =
-            json["message"] ?? "Something went wrong";
+      debugPrint("Customer API Response: ${response.data}");
 
+      // 🔹 Read values from API response
+      final bool status = response.data["status"] ?? false;
+      final String message =
+          response.data["message"] ?? "Something went wrong";
+
+      if (response.statusCode == 200) {
         if (status) {
+          // ✅ SUCCESS CASE
           SnackBarView.showSuccessMessage(message);
           clearForm();
         } else {
-          /// 🔥 THIS IS YOUR CASE
+          // ❌ FAILURE FROM SERVER (like: profile already exists)
           SnackBarView.showErrorMessage(message);
         }
       } else {
-        SnackBarView.showErrorMessage("No response from server");
+        SnackBarView.showErrorMessage("Server error: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Customer save error: $e");
@@ -87,6 +89,7 @@ class CustomerManagemetController extends GetxController {
       loading.value = false;
     }
   }
+
 
 
   void clearForm() {

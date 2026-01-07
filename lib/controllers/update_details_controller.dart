@@ -13,11 +13,14 @@ import 'dart:core';
 import 'package:get/get.dart';
 
 
-
 class UpdateDetailsController extends GetxController {
   /// STORE LIST
   var stores = <StoreItem>[].obs;
   var selectedStore = Rxn<StoreItem>();
+
+  var isEditable = true.obs;
+  var isActiveStore = false.obs;
+
 
   /// STORE CATEGORY
   var storeCategories = <StoreCategory>[].obs;
@@ -36,8 +39,12 @@ class UpdateDetailsController extends GetxController {
   var tradeLicense = Rxn<File>();
   var drugLicense = Rxn<File>();
 
-  late final businessTypeId = selectedStoreCategory.value?.storeCategoryId;
+  late final businessTypeId = selectedStoreCategory.value?.storeBusinessType;
   late final storeVerificationStatus = selectedStore.value?.storeVerifiedStatus.toString() ?? "false";
+
+  final businessTypes = <StoreCategory>[].obs;
+  final selectedBusinessType = Rxn<StoreCategory>();
+
   /// TEXT CONTROLLERS
   final storeName = TextEditingController();
   final pincodeController = TextEditingController();
@@ -48,19 +55,32 @@ class UpdateDetailsController extends GetxController {
   final mobileNumberController = TextEditingController();
   final emailController = TextEditingController();
   final gstController = TextEditingController();
-  var isEditable = true.obs;
 
-  ///  HELPER → CHECK ACTIVE STORE
-  bool get isActiveStore => status.value == "ACTIVE";
 
   @override
   void onInit() {
     super.onInit();
     fetchStoresFromApi();
     fetchStoreCategory();
+    fetchBusinessTypes();
   }
 
 
+  Future<void> fetchBusinessTypes() async {
+    try {
+      final response = await apiCalls.getMethod(
+        "http://3.111.125.81/api/adminStoreBusinessType/get",
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final List list = response.data;
+        businessTypes.value =
+            list.map((e) => StoreCategory.fromJson(e)).toList();
+      }
+    } catch (e) {
+      debugPrint(" fetchBusinessTypes error: $e");
+    }
+  }
 
   Future<void> uploadDocuments() async {
     try {
@@ -145,10 +165,6 @@ class UpdateDetailsController extends GetxController {
   }
 
 
-
-
-
-
   Future<void> updateStoreDetails() async {
     try {
       isLoading.value = true;
@@ -179,7 +195,8 @@ class UpdateDetailsController extends GetxController {
         "secondaryContact": store.secondaryContact ?? "",
         "ownerEmail": emailController.text.trim(),
         "storeVerificationStatus": storeVerificationStatus, // from API
-        "businessType": businessTypeId,
+        "businessType": selectedBusinessType.value?.businessName ?? "",
+
       };
 
       debugPrint("📦 REQUEST BODY:");
@@ -288,13 +305,25 @@ class UpdateDetailsController extends GetxController {
     }
   }
 
-
   void onStoreSelected(StoreItem? store) async {
+
+
+
+
     if (store == null) return;
 
     selectedStore.value = store;
 
-    /// Autofill fields
+    /// find matching business type
+    final match = businessTypes.firstWhereOrNull(
+          (e) => e.businessName == store.storeBusinessType,
+    );
+
+    if (match != null) {
+      selectedBusinessType.value = match;
+    }
+
+    /// 🔹 Autofill fields
     storeName.text = store.name;
     pincodeController.text = store.pincode;
     districtController.text = store.district;
@@ -305,12 +334,19 @@ class UpdateDetailsController extends GetxController {
     emailController.text = store.ownerEmail;
     gstController.text = store.gstNumber;
 
-    /// ✅ SAVE SELECTED STORE ID
+    /// 🔹 STATUS LOGIC
+    if (store.status == "ACTIVE") {
+      isEditable.value = false;     // 🔒 lock fields
+      isActiveStore.value = true;  // for UI color
+    } else {
+      isEditable.value = true;     // ✏️ allow edit
+      isActiveStore.value = false;
+    }
+
+    /// 🔹 SAVE SELECTED STORE ID
     await prefs.saveStoredUserId(store.userIdStoreId);
 
-    debugPrint(
-      "💾 Stored Selected userIdStoreId => ${store.userIdStoreId}",
-    );
+    debugPrint("💾 Stored Selected userIdStoreId => ${store.userIdStoreId}");
   }
 
 

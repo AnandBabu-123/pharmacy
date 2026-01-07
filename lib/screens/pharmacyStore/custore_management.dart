@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-
 import '../../controllers/customer_managemnt_controller.dart';
 
 class CustomerManagement extends StatelessWidget {
   CustomerManagement({super.key});
 
-  final CustomerManagemetController controller =
-  Get.put(CustomerManagemetController());
+  final CustomerManagementController controller =
+  Get.put(CustomerManagementController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Customer Management"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF90EE90), Color(0xFF87CEFA)],
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -28,8 +34,6 @@ class CustomerManagement extends StatelessWidget {
             _inputField("Location*", controller.locationController),
             const SizedBox(height: 12),
 
-            _inputField("Address*", controller.addressController),
-            const SizedBox(height: 12),
 
             _inputField("Contact*", controller.contactController,
                 keyboard: TextInputType.phone),

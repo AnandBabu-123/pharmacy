@@ -250,7 +250,8 @@ class SearchPharmacyUser extends StatelessWidget {
   void _openUploadBottomSheet(
       BuildContext context,
       ItemCodeMasters item,
-      ) {
+      )
+  {
     final controller = Get.find<AddPharmacyController>();
 
     showModalBottomSheet(

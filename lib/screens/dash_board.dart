@@ -16,7 +16,7 @@ class DashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: const AppDrawer(),
+      drawer:  AppDrawer(),
 
       /// 🌈 GRADIENT APPBAR
       appBar: AppBar(
