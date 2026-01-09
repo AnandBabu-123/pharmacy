@@ -14,336 +14,347 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer:  AppDrawer(),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer:  AppDrawer(),
 
-      /// 🌈 GRADIENT APPBAR
-      appBar: AppBar(
-        title: const Text(
-          "RXWala Pharmacy",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF90EE90), // Green
-                Color(0xFF87cefa), // Teal
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        /// 🌈 GRADIENT APPBAR
+        appBar: AppBar(
+          title: const Text(
+            "RXWala Pharmacy",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF90EE90), // Green
+                  Color(0xFF87cefa), // Teal
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
-        ),
-        leading: IconButton(
-          icon: const CircleAvatar(
-            backgroundImage: AssetImage("assets/userLogo.png"),
-            backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: const CircleAvatar(
+              backgroundImage: AssetImage("assets/userLogo.png"),
+              backgroundColor: Colors.white,
+            ),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_none),
+              onPressed: () {},
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
-          ),
-        ],
-      ),
 
-      /// 🌿 BODY BACKGROUND COLOR
-      body: Container(
-        color: const Color(0xFFF1F8E9),
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        /// 🌿 BODY BACKGROUND COLOR
+        body: Container(
+          color: const Color(0xFFF1F8E9),
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (controller.storeList.isEmpty) {
-            return const Center(
-              child: Text(
-                "No Stores Found",
-                style: TextStyle(fontSize: 16),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: controller.storeList.length,
-            itemBuilder: (context, index) {
-              final store = controller.storeList[index];
-
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-
-                      /// STORE NAME
-                      Text(
-                        "Name : ${store.name ?? ""}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      _buildRow("Location", store.location),
-                      _buildRow("Owner", store.owner),
-                      _buildRow("Contact", store.ownerContact),
-                      _buildRow("PinCode", store.pincode),
-                      _buildRow("District", store.district),
-                      _buildRow("State", store.state),
-                      _buildRow("Date", store.registrationDate),
-                      _buildRow("Role", store.role ?? "-"),
-                    ],
-                  ),
+            if (controller.storeList.isEmpty) {
+              return const Center(
+                child: Text(
+                  "No Stores Found",
+                  style: TextStyle(fontSize: 16),
                 ),
               );
+            }
 
-            },
-          );
-        }),
-      ),
+            return ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: controller.storeList.length,
+              itemBuilder: (context, index) {
+                final store = controller.storeList[index];
 
-      /// ➕ FAB
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF90EE90),
-        onPressed: () {
-          _openAddStoreBottomSheet();
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Add Store"),
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// STORE NAME
+                        Text(
+                          "Name : ${store.name ?? ""}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        _buildRow("Location", store.location),
+                        _buildRow("Owner", store.owner),
+                        _buildRow("Contact", store.ownerContact),
+                        _buildRow("PinCode", store.pincode),
+                        _buildRow("District", store.district),
+                        _buildRow("State", store.state),
+                        _buildRow("Date", store.registrationDate),
+                        _buildRow("Role", store.role ?? "-"),
+                      ],
+                    ),
+                  ),
+                );
+
+              },
+            );
+          }),
+        ),
+
+        /// ➕ FAB
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: const Color(0xFF90EE90),
+          onPressed: () {
+            _openAddStoreBottomSheet();
+          },
+          icon: const Icon(Icons.add),
+          label: const Text("Add Store"),
+        ),
       ),
     );
   }
 
   void _openAddStoreBottomSheet() {
     Get.bottomSheet(
-      Container(
-        height: MediaQuery.of(Get.context!).size.height * 0.85, // 👈 CONTROL HEIGHT
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+
+      Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
         ),
-        child: Column(
-          children: [
+        child: Container(
+          height: MediaQuery.of(Get.context!).size.height * 0.85, // 👈 CONTROL HEIGHT
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
 
-            /// DRAG HANDLE
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(10),
+              /// DRAG HANDLE
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-            ),
 
-            /// TITLE (FIXED)
-            const Text(
-              "Add New Store",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              /// TITLE (FIXED)
+              const Text(
+                "Add New Store",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-            /// 🔽 SCROLLABLE CONTENT
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              /// 🔽 SCROLLABLE CONTENT
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
 
-                    Text(
-                      "Store Category",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                      Text(
+                        "Store Category",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
 
-                    const SizedBox(height: 6),
+                      const SizedBox(height: 6),
 
-                    Obx(() {
-                      return DropdownButtonFormField<StoreCategory>(
-                        value: controller.selectedStoreCategory.value,
-                        items: controller.storeCategories.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Text(category.storeCategoryName ?? ""),
-                          );
-                        }).toList(),
-                        onChanged: controller.onStoreCategoryChanged,
-                        decoration: InputDecoration(
-                          hintText: "Select Store Category",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      Obx(() {
+                        return DropdownButtonFormField<StoreCategory>(
+                          value: controller.selectedStoreCategory.value,
+                          items: controller.storeCategories.map((category) {
+                            return DropdownMenuItem(
+                              value: category,
+                              child: Text(category.storeCategoryName ?? ""),
+                            );
+                          }).toList(),
+                          onChanged: controller.onStoreCategoryChanged,
+                          decoration: InputDecoration(
+                            hintText: "Select Store Category",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
 
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                    Text(
-                      "Business Type",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                      Text(
+                        "Business Type",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
 
-                    const SizedBox(height: 6),
+                      const SizedBox(height: 6),
 
-                    Obx(() {
-                      return DropdownButtonFormField<StoreBusinessType>(
-                        value: controller.selectedBusinessType.value,
-                        items: controller.filteredBusinessTypes.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type.businessName ?? ""),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          controller.selectedBusinessType.value = value;
+                      Obx(() {
+                        return DropdownButtonFormField<StoreBusinessType>(
+                          value: controller.selectedBusinessType.value,
+                          items: controller.filteredBusinessTypes.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(type.businessName ?? ""),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            controller.selectedBusinessType.value = value;
+                          },
+                          decoration: InputDecoration(
+                            hintText: "Select Business Type",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        );
+                      }),
+
+
+                      const SizedBox(height: 10),
+
+                      _twoFieldRowStore(
+                        leftLabel: "Store Id",
+                        rightLabel: "Store Name",
+                        leftHint: "Enter Store Id",
+                        rightHint: "Enter Store Name",
+                        leftController: controller.storeId,
+                        rightController: controller.storeName,
+                        leftKeyboardType: TextInputType.number, // Number keypad
+                        rightKeyboardType: TextInputType.text,  // Normal text keypad
+                      ),
+
+
+                      _twoFieldRows(
+                        leftLabel: "PinCode",
+                        rightLabel: "Location",
+                        leftHint: "PinCode",
+                        rightHint: "Location",
+                        rightController: controller.locationController,
+                        leftController: controller.pincodeController,
+                        leftKeyboardType: TextInputType.number,
+                        leftOnChanged: (value) {
+                          if (value.length == 6) {
+                            controller.fetchLocationFromPincode(value);
+                          }
                         },
-                        decoration: InputDecoration(
-                          hintText: "Select Business Type",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      ),
+
+                      _twoFieldRows(
+                        leftLabel: "State",
+                        rightLabel: "District",
+                        leftHint: "State",
+                        rightHint: "District",
+                        leftController: controller.stateController,
+                        rightController: controller.districtController,
+                        leftReadOnly: true,
+                        rightReadOnly: true,
+                      ),
+
+                      _twoFieldRows(
+                        leftLabel: "GST",
+                        rightLabel: "Town",
+                        leftHint: "GST",
+                        rightHint: "Town",
+                        leftController: controller.gstController,
+                        rightController: controller.townController,
+                        rightReadOnly: true,
+                      ),
+
+                      _twoFieldRowConatct(
+                        leftLabel: "Store Owner",
+                        rightLabel: "Owner Address",
+                        leftHint: "Owner Name",
+                        rightHint: "Address",
+                        leftController: controller.userNameController,
+                        rightController: controller.OwnerAddressContactController,
+                        leftReadOnly: true,
+                      ),
+                      _twoFieldRowConatct(
+                        leftLabel: "Owner Contact",
+                        rightLabel: "Alternate Contact",
+                        leftHint: "Contact",
+                        rightHint: "Alternate",
+                        leftController: controller.mobileNumberController,
+                        rightController: controller.alternateContactController,
+                        leftReadOnly: true,
+                      ),
+
+
+                      const SizedBox(height: 10),
+
+                      Text(
+                        "Email",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+
+                      _buildTextField(
+                        "Email",
+                        controller: controller.emailController,
+                        readOnly: true,
+                      ),
+
+
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Get.back(),
+                              child: const Text("Cancel"),
+                            ),
                           ),
-                        ),
-                      );
-                    }),
-
-
-                    const SizedBox(height: 10),
-
-                    _twoFieldRowStore(
-                      leftLabel: "Store Id",
-                      rightLabel: "Store Name",
-                      leftHint: "Enter Store Id",
-                      rightHint: "Enter Store Name",
-                      leftController: controller.storeId,
-                      rightController: controller.storeName,
-                      leftKeyboardType: TextInputType.number, // Number keypad
-                      rightKeyboardType: TextInputType.text,  // Normal text keypad
-                    ),
-
-
-                    _twoFieldRows(
-                      leftLabel: "PinCode",
-                      rightLabel: "Location",
-                      leftHint: "PinCode",
-                      rightHint: "Location",
-                      rightController: controller.locationController,
-                      leftController: controller.pincodeController,
-                      leftKeyboardType: TextInputType.number,
-                      leftOnChanged: (value) {
-                        if (value.length == 6) {
-                          controller.fetchLocationFromPincode(value);
-                        }
-                      },
-                    ),
-
-                    _twoFieldRows(
-                      leftLabel: "State",
-                      rightLabel: "District",
-                      leftHint: "State",
-                      rightHint: "District",
-                      leftController: controller.stateController,
-                      rightController: controller.districtController,
-                      leftReadOnly: true,
-                      rightReadOnly: true,
-                    ),
-
-                    _twoFieldRows(
-                      leftLabel: "GST",
-                      rightLabel: "Town",
-                      leftHint: "GST",
-                      rightHint: "Town",
-                      leftController: controller.gstController,
-                      rightController: controller.townController,
-                      rightReadOnly: true,
-                    ),
-
-                    _twoFieldRowConatct(
-                      leftLabel: "Store Owner",
-                      rightLabel: "Owner Address",
-                      leftHint: "Owner Name",
-                      rightHint: "Address",
-                      leftController: controller.userNameController,
-                      rightController: controller.OwnerAddressContactController,
-                      leftReadOnly: true,
-                    ),
-                    _twoFieldRowConatct(
-                      leftLabel: "Owner Contact",
-                      rightLabel: "Alternate Contact",
-                      leftHint: "Contact",
-                      rightHint: "Alternate",
-                      leftController: controller.mobileNumberController,
-                      rightController: controller.alternateContactController,
-                      leftReadOnly: true,
-                    ),
-
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      "Email",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-
-                    _buildTextField(
-                      "Email",
-                      controller: controller.emailController,
-                      readOnly: true,
-                    ),
-
-
-                    const SizedBox(height: 80),
-                  ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF90EE90),
+                              ),
+                              onPressed: () {
+                                controller.createStoreDetails();
+                              },
+                              child: const Text("Save"),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 60,)
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            /// ACTION BUTTONS (FIXED BOTTOM)
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Get.back(),
-                    child: const Text("Cancel"),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF90EE90),
-                    ),
-                    onPressed: () {
-                      controller.createStoreDetails();
-                    },
-                    child: const Text("Save"),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              /// ACTION BUTTONS (FIXED BOTTOM)
+
+            ],
+          ),
         ),
       ),
       isScrollControlled: true,

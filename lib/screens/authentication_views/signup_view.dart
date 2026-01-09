@@ -113,18 +113,28 @@ class SignUPView extends StatelessWidget {
 
                 const SizedBox(height: 30),
 
-                /// SIGN UP BUTTON
-                Obx(() => controller.isLoading.value
-                    ? CircularProgressIndicator()
-                    : ElevatedButton(
-                  onPressed: (){
+
+                Obx(() => ElevatedButton(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : () {
                     if (controller.isFormValid()) {
                       controller.register();
                     }
                   },
-                 // controller.register,
-                  child: Text("Submit"),
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Text("Submit"),
                 )),
+
+
                 const SizedBox(height: 30),
 
                 /// LOGIN REDIRECT AT BOTTOM

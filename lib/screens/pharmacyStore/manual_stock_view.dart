@@ -139,6 +139,7 @@ class ManualStockView extends StatelessWidget {
                 label: const Text("Add Item"),
               ),
             ),
+            SizedBox(height: 30,)
           ],
         ),
       ),

@@ -234,6 +234,7 @@ class SearchPharmacyUser extends StatelessWidget {
                   : null,
               child: const Text("Next"),
             ),
+            SizedBox(height: 100,)
           ],
         ),
       );
@@ -420,6 +421,7 @@ class SearchPharmacyUser extends StatelessWidget {
                     ),
                   ],
                 ),
+                SizedBox(height: 60,)
               ],
             );
           }),
@@ -529,6 +531,7 @@ class SearchPharmacyUser extends StatelessWidget {
                   ),
                 ],
               ),
+              SizedBox(height: 60,)
             ],
           ),
         );

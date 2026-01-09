@@ -169,6 +169,7 @@ class SalesInvoiceView extends StatelessWidget {
                 label: const Text("Add Item"),
               ),
             ),
+            SizedBox(height: 30,)
           ],
         ),
       ),

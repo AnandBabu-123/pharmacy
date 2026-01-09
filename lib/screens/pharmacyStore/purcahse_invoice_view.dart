@@ -58,6 +58,7 @@ class PurcahseInvoiceView extends StatelessWidget {
 
             // Invoice + Items
             _buildInvoiceContainer(),
+            SizedBox(height: 120,)
           ],
         ),
       ),
@@ -123,7 +124,6 @@ class PurcahseInvoiceView extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
 
           // Item Cards
           Obx(() {
@@ -133,6 +133,7 @@ class PurcahseInvoiceView extends StatelessWidget {
                   .toList(),
             );
           }),
+
         ],
       ),
     );
