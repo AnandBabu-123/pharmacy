@@ -22,7 +22,8 @@ class UserDetailsController extends GetxController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final mobileController = TextEditingController();
-  final searchController = TextEditingController();
+  final addressController = TextEditingController();
+  final passwordController = TextEditingController();
   // var searchedUsers = <StoreInfo>[].obs;
   var searchedUsers = <StoreInfo>[].obs; // ListView based on storeInfo
   var storeAndStoreUsers = <StoreAndStoreUser>[].obs; // storeAndStoreUser list
@@ -33,6 +34,68 @@ class UserDetailsController extends GetxController {
     super.onInit();
     fetchStores();
   }
+
+  Future<void> addStoreUser() async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      /// 🔹 VALIDATION
+      if (nameController.text.isEmpty ||
+          mobileController.text.isEmpty ||
+          emailController.text.isEmpty ||
+          passwordController.text.isEmpty ||
+          selectedStore.value == null) {
+        Get.snackbar("Validation", "Please fill all fields");
+        return;
+      }
+
+      /// 🔹 REQUEST BODY
+      final Map<String, dynamic> data = {
+        "userFullName": nameController.text.trim(),
+        "userPhoneNumber": mobileController.text.trim(),
+        "userEmail": emailController.text.trim(),
+        "status": "active",
+        "password": passwordController.text.trim(),
+        "storeId": selectedStore.value!.id, // 👈 from dropdown
+      };
+
+      debugPrint("📤 ADD USER BODY: $data");
+
+      final response = await apiCalls.postMethod(
+        RouteUrls.addStoreUser,
+        data,
+      );
+
+      debugPrint("📥 STATUS: ${response.statusCode}");
+      debugPrint("📥 RESPONSE: ${response.data}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar("Success", "User added successfully");
+
+        /// 🔹 CLEAR FORM
+        nameController.clear();
+        mobileController.clear();
+        emailController.clear();
+        passwordController.clear();
+        selectedStore.value = null;
+      } else {
+        Get.snackbar(
+          "Error",
+          response.data?['responseMessage'] ?? "Failed to add user",
+        );
+      }
+    } catch (e, s) {
+      debugPrint("❌ ADD USER ERROR: $e");
+      debugPrint("🧵 STACKTRACE:\n$s");
+      Get.snackbar("Error", "Something went wrong");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
 
   Future<void> updateStoreUser({
     required String suUserId,

@@ -67,7 +67,7 @@ class AppDrawer extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.person, size: 18),
                 title: const Text(
-                  "User Store",
+                  "Add Store User",
                   style: TextStyle(fontSize: 14),
                 ),
                 onTap: () {

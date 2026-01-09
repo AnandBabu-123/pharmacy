@@ -12,6 +12,7 @@ static const String mobileOTP ="user/verifySmsOTP";
 static const String storeCategory = "store/getAllStoreCategories";
 static const String storeBusinessType = "api/adminStoreBusinessType/get";
 static const String createStoreDetails = "store/create";
+static const String addStoreUser = "api/storeAndStoreUserRegister";
 static const String updateStoreDetails ="store/update";
 static const String uploadDocuments = "store/upload";
 static const String searchUser ="api/get-SUUsers";
