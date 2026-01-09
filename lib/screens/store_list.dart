@@ -41,7 +41,8 @@ class StoreList extends StatelessWidget {
       ),
 
       /// 🌿 BODY BACKGROUND COLOR
-      body: Container(
+      body:
+      Container(
         color: const Color(0xFFF1F8E9),
         child: Obx(() {
           if (controller.isLoading.value) {
@@ -93,11 +94,12 @@ class StoreList extends StatelessWidget {
                       _buildRow("Current Membership", store.currentPlan),
                       _buildRow("GST Number", store.gstNumber),
                       _buildRow("Status", store.status),
-                      _buildRow("Store Business Type", store.storeBusinessType),
-                      _buildRow(
-                        "Store Verified Status",
-                        store.storeVerifiedStatus.toString(),
-                      ),
+                      Obx(() => _buildRow(
+                        "Store Business Type",
+                        controller.getBusinessName(store.storeBusinessType),
+                      )),
+
+                      _buildRow("Store Verified Status", store.storeVerifiedStatus.toString(),),
 
                       const SizedBox(height: 12),
 
@@ -135,11 +137,22 @@ class StoreList extends StatelessWidget {
   void _openUpdateStoreBottomSheet(
       BuildContext context,
       Stores store,
-      )
-  {
-    // Controllers with initial values
-    final storeIdCtrl = TextEditingController(text: store.id);
-    final categoryCtrl = TextEditingController(text: store.type);
+      ) {
+    final bool isActive = store.status == "ACTIVE";
+    final bool canEdit = !isActive;
+
+    // 🔹 Preselect dropdown values
+    controller.selectedStore.value =
+        controller.stores.firstWhereOrNull(
+              (s) => s.id == store.id,
+        );
+
+    controller.selectedStoreCategory.value =
+        controller.storeCategories.firstWhereOrNull(
+              (c) => c.storeCategoryId == store.type, // adjust field if needed
+        );
+
+    // 🔹 Controllers with initial values
     final storeNameCtrl = TextEditingController(text: store.name);
     final locationCtrl = TextEditingController(text: store.location);
     final stateCtrl = TextEditingController(text: store.state);
@@ -148,10 +161,8 @@ class StoreList extends StatelessWidget {
     final pincodeCtrl = TextEditingController(text: store.pincode);
     final townCtrl = TextEditingController(text: store.district);
     final ownerCtrl = TextEditingController(text: store.owner);
-    final ownerAddressCtrl =
-    TextEditingController(text: store.location);
-    final ownerContactCtrl =
-    TextEditingController(text: store.ownerContact);
+    final ownerAddressCtrl = TextEditingController(text: store.location);
+    final ownerContactCtrl = TextEditingController(text: store.ownerContact);
     final alternateContactCtrl =
     TextEditingController(text: store.secondaryContact);
     final emailCtrl = TextEditingController(text: store.ownerEmail);
@@ -179,42 +190,37 @@ class StoreList extends StatelessWidget {
                 const Center(
                   child: Text(
                     "Update Store",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-
                 const SizedBox(height: 16),
 
-                /// 🔹 STORE + CATEGORY
                 /// 🔹 STORE ID
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Store ID*",
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                    ),
+                    const Text("Store ID*",
+                        style:
+                        TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Obx(() {
                       return DropdownButtonFormField<StoreItem>(
-                        value: updateController.selectedStore.value,
-                        items: updateController.stores.map((store) {
+                        value: controller.selectedStore.value,
+                        items: controller.stores.map((s) {
                           return DropdownMenuItem(
-                            value: store,
-                            child: Text("${store.id} - ${store.name}"),
+                            value: s,
+                            child: Text("${s.id} - ${s.name}"),
                           );
                         }).toList(),
-                        onChanged: updateController.onStoreSelected,
+                        onChanged:
+                        canEdit ? controller.onStoreSelected : null,
                         decoration: const InputDecoration(
                           isDense: true,
                           border: OutlineInputBorder(),
                         ),
                       );
                     }),
-                    const SizedBox(height: 12), // spacing to next field
+                    const SizedBox(height: 12),
                   ],
                 ),
 
@@ -222,22 +228,23 @@ class StoreList extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Store Category*",
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                    ),
+                    const Text("Store Category*",
+                        style:
+                        TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Obx(() {
                       return DropdownButtonFormField<StoreCategory>(
                         value: controller.selectedStoreCategory.value,
                         isExpanded: true,
-                        items: controller.storeCategories.map((category) {
+                        items: controller.storeCategories.map((c) {
                           return DropdownMenuItem(
-                            value: category,
-                            child: Text(category.storeCategoryName ?? ""),
+                            value: c,
+                            child: Text(c.storeCategoryName ?? ""),
                           );
                         }).toList(),
-                        onChanged: controller.onStoreCategoryChanged,
+                        onChanged: canEdit
+                            ? controller.onStoreCategoryChanged
+                            : null,
                         decoration: const InputDecoration(
                           isDense: true,
                           border: OutlineInputBorder(),
@@ -250,38 +257,48 @@ class StoreList extends StatelessWidget {
 
                 /// 🔹 STORE NAME + LOCATION
                 _twoFieldRow(
-                  left: _labelField("Store Name*", storeNameCtrl),
-                  right: _labelField("Location*", locationCtrl),
+                  left: _labelField("Store Name*", storeNameCtrl,
+                      enabled: canEdit),
+                  right: _labelField("Location*", locationCtrl,
+                      enabled: canEdit),
                 ),
 
                 /// 🔹 STATE + DISTRICT
                 _twoFieldRow(
-                  left: _labelField("State*", stateCtrl),
-                  right: _labelField("District*", districtCtrl),
+                  left:
+                  _labelField("State*", stateCtrl, enabled: canEdit),
+                  right: _labelField("District*", districtCtrl,
+                      enabled: canEdit),
                 ),
 
                 /// 🔹 GST + PINCODE
                 _twoFieldRow(
-                  left: _labelField("GST Number*", gstCtrl),
+                  left: _labelField("GST Number*", gstCtrl,
+                      enabled: canEdit),
                   right: _labelField(
                     "PinCode*",
                     pincodeCtrl,
+                    enabled: canEdit,
                     keyboardType: TextInputType.number,
                   ),
                 ),
 
                 /// 🔹 TOWN + OWNER
                 _twoFieldRow(
-                  left: _labelField("Town*", townCtrl),
-                  right: _labelField("Store Owner*", ownerCtrl),
+                  left:
+                  _labelField("Town*", townCtrl, enabled: canEdit),
+                  right: _labelField("Store Owner*", ownerCtrl,
+                      enabled: canEdit),
                 ),
 
                 /// 🔹 OWNER ADDRESS + OWNER CONTACT
                 _twoFieldRow(
-                  left: _labelField("Owner Address*", ownerAddressCtrl),
+                  left: _labelField("Owner Address*", ownerAddressCtrl,
+                      enabled: canEdit),
                   right: _labelField(
                     "Owner Contact*",
                     ownerContactCtrl,
+                    enabled: canEdit,
                     keyboardType: TextInputType.phone,
                   ),
                 ),
@@ -291,11 +308,13 @@ class StoreList extends StatelessWidget {
                   left: _labelField(
                     "Alternate Contact*",
                     alternateContactCtrl,
+                    enabled: canEdit,
                     keyboardType: TextInputType.phone,
                   ),
                   right: _labelField(
                     "Email Id*",
                     emailCtrl,
+                    enabled: canEdit,
                     keyboardType: TextInputType.emailAddress,
                   ),
                 ),
@@ -314,10 +333,12 @@ class StoreList extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: canEdit
+                            ? () {
                           updateController.updateStoreDetails();
                           Navigator.pop(context);
-                        },
+                        }
+                            : null, // 🔒 disabled when ACTIVE
                         child: const Text("Update"),
                       ),
                     ),

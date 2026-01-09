@@ -16,7 +16,7 @@ class AppDrawer extends StatelessWidget {
         children: [
           Obx(() => UserAccountsDrawerHeader(
             decoration: const BoxDecoration(
-              color: Colors.lightBlueAccent, // 🌤 Sky blue
+              color: Colors.lightBlueAccent,
             ),
             currentAccountPicture: const CircleAvatar(
               backgroundImage: AssetImage("assets/userLogo.png"),
@@ -31,55 +31,65 @@ class AppDrawer extends StatelessWidget {
                   ? drawerController.email.value
                   : "guest@email.com",style: TextStyle(color: Colors.black)
             ),
-
-
           )),
-
-          //
-          // Obx(() => ListTile(
-          //   leading: const Icon(Icons.badge),
-          //   title: Text("User ID: ${drawerController.userId.value}"),
-          // )),
 
 
           ExpansionTile(
             leading: const Icon(Icons.store),
             title: const Text(
               "Store Details",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,          // ⬇ reduced from 18
+                fontWeight: FontWeight.w600,
+              ),
             ),
             children: [
               ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text("Update Store"),
+                leading: const Icon(Icons.edit, size: 18), // ⬇ smaller icon
+                title: const Text(
+                  "Update Store",
+                  style: TextStyle(fontSize: 14),          // ⬇ reduced
+                ),
                 onTap: () {
                   Get.toNamed(AppRoutes.updateStoreDetails);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text("Update Store Documents"),
+                leading: const Icon(Icons.edit, size: 18),
+                title: const Text(
+                  "Update Store Documents",
+                  style: TextStyle(fontSize: 14),
+                ),
                 onTap: () {
                   Get.toNamed(AppRoutes.updateStoreDocuments);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text("User Store"),
+                leading: const Icon(Icons.person, size: 18),
+                title: const Text(
+                  "User Store",
+                  style: TextStyle(fontSize: 14),
+                ),
                 onTap: () {
                   Get.toNamed(AppRoutes.userStoreDetails);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text("Get User Store"),
+                leading: const Icon(Icons.person, size: 18),
+                title: const Text(
+                  "Get User Store",
+                  style: TextStyle(fontSize: 14),
+                ),
                 onTap: () {
                   Get.toNamed(AppRoutes.getStoreUser);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.list),
-                title: const Text("Store List"),
+                leading: const Icon(Icons.list, size: 18),
+                title: const Text(
+                  "Store List",
+                  style: TextStyle(fontSize: 14),
+                ),
                 onTap: () {
                   Get.toNamed(AppRoutes.storeList);
                 },
@@ -87,30 +97,43 @@ class AppDrawer extends StatelessWidget {
             ],
           ),
 
-          /// PHARMACY MANAGEMENT
+
+    /// PHARMACY MANAGEMENT
           ExpansionTile(
             leading: const Icon(Icons.local_pharmacy),
             title: const Text(
               "Pharmacy Management",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),
             ),
             children: [
 
               /// 🔹 Item Management
               ExpansionTile(
                 leading: const Icon(Icons.inventory_2),
-                title: const Text("Item Management"),
+                title: const Text("Item Management",style: TextStyle(
+                  fontSize: 14,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.add_box),
-                    title: const Text("Add Item"),
+                    title: const Text("Add Item",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.addPharmacy);
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.search),
-                    title: const Text("Get Item"),
+                    title: const Text("Get Item",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.searchPharmacyUser);
                     },
@@ -121,18 +144,26 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 Rack Management
               ExpansionTile(
                 leading: const Icon(Icons.view_in_ar),
-                title: const Text("Rack Management"),
+                title: const Text("Rack Management",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.add_circle_outline),
-                    title: const Text("Add Rack"),
+                    title: const Text("Add Rack",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.addRackManagement);
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.list_alt),
-                    title: const Text("View Racks"),
+                    title: const Text("View Racks",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.getRackManagement);
                     },
@@ -143,18 +174,26 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 Purchase Invoice
               ExpansionTile(
                 leading: const Icon(Icons.receipt_long),
-                title: const Text("Purchase Invoice"),
+                title: const Text("Purchase Invoice",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.receipt),
-                    title: const Text("Purchase Invoice"),
+                    title: const Text("Purchase Invoice",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
-                      Get.toNamed(AppRoutes.getInvoice);
+                      Get.toNamed(AppRoutes.purchaseScreen);
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.analytics),
-                    title: const Text("Purchase Report"),
+                    title: const Text("Purchase Report",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.getPurchaseReport);
                     },
@@ -165,11 +204,17 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 Sales Invoice
               ExpansionTile(
                 leading: const Icon(Icons.point_of_sale),
-                title: const Text("Sales Invoice"),
+                title: const Text("Sales Invoice",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.request_quote),
-                    title: const Text("Sales Invoice"),
+                    title: const Text("Sales Invoice",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.salesInVoice);
                     },
@@ -180,11 +225,16 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 Price Management
               ExpansionTile(
                 leading: const Icon(Icons.price_change),
-                title: const Text("Price Management"),
+                title: const Text("Price Management",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.tune),
-                    title: const Text("Price Manage"),
+                    title: const Text("Price Manage",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.priceManage);
                     },
@@ -195,18 +245,27 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 Stock Management
               ExpansionTile(
                 leading: const Icon(Icons.warehouse),
-                title: const Text("Stock Management"),
+                title: const Text("Stock Management",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.assessment),
-                    title: const Text("Stock Report"),
+                    title: const Text("Stock Report",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.stockReport);
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.playlist_add_check),
-                    title: const Text("Manual Stock"),
+                    title: const Text("Manual Stock",
+                      style: TextStyle(
+                        fontSize: 14,          // ⬇ reduced from 18
+                      ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.manualStock);
                     },
@@ -217,11 +276,16 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 GST Report
               ExpansionTile(
                 leading: const Icon(Icons.account_balance),
-                title: const Text("GST Report"),
+                title: const Text("GST Report",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.summarize),
-                    title: const Text("GST Report"),
+                    title: const Text("GST Report",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.gstReport);
                     },
@@ -232,11 +296,17 @@ class AppDrawer extends StatelessWidget {
               /// 🔹 Customer Management
               ExpansionTile(
                 leading: const Icon(Icons.people_alt),
-                title: const Text("Customer Management"),
+                title: const Text("Customer Management",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.manage_accounts),
-                    title: const Text("Customer Management"),
+                    title: const Text("Customer Management",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.customerManagement);
                     },

@@ -15,6 +15,7 @@ import 'package:propertysearch/screens/pharmacyStore/gst_report_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/manual_stock_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/price_manage_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/purcahse_invoice_view.dart';
+import 'package:propertysearch/screens/pharmacyStore/purchase_invoice_screen.dart';
 import 'package:propertysearch/screens/pharmacyStore/sales_invoice_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/search_pharmacy_user.dart';
 import 'package:propertysearch/screens/pharmacyStore/stock_report_view.dart';
@@ -51,6 +52,7 @@ class AppRoutes {
    static const manualStock ="/manualStock";
    static const gstReport ="/gstReport";
    static const customerManagement = "/customerManagement";
+   static const purchaseScreen ="/purchaseScreen";
 
 
   static final routes = [
@@ -58,7 +60,6 @@ class AppRoutes {
     GetPage(name: signupView, page: () =>  SignUPView(),),
     GetPage(name: dashBoardView, page: () =>  DashboardView(),),
     GetPage(name: forgotPassword, page: () => ForgotPassword()),
-    GetPage(name: signupView, page: () => SignUPView()),
     GetPage(name: otpScreen, page: () => OtpScreen()),
     GetPage(name: updateStoreDetails, page: () => UpdateDetailsScreen()),
     GetPage(name: userStoreDetails, page: () => UserStoreDetails()),
@@ -78,6 +79,7 @@ class AppRoutes {
     GetPage(name: manualStock, page: () => ManualStockView()),
     GetPage(name: gstReport, page: () => GstReportView()),
     GetPage(name: customerManagement, page: () => CustomerManagement()),
+    GetPage(name: purchaseScreen, page: () => PurchaseInvoiceScreen()),
 
   ];
 }

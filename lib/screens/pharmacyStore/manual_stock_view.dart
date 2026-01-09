@@ -34,6 +34,83 @@ class ManualStockView extends StatelessWidget {
               controller: controller,
             ),
 
+            const SizedBox(height: 8),
+
+            /// 🔹 STORE DETAILS (EXPAND / COLLAPSE)
+            Obx(() {
+              final store = controller.selectedStore.value;
+
+              if (store == null) return const SizedBox();
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  /// 🔹 HEADER (CLICK TO TOGGLE)
+                  GestureDetector(
+                    onTap: () =>
+                    controller.isStoreExpanded.value =
+                    !controller.isStoreExpanded.value,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Store Details",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            controller.isStoreExpanded.value
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  /// 🔹 DETAILS BODY
+                  if (controller.isStoreExpanded.value)
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.shade300,
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          _infoRow("Store ID", store.id),
+                          _infoRow("Name", store.name),
+                          _infoRow("Type", store.type),
+                          _infoRow("Location", store.location),
+                          _infoRow("District", store.district),
+                          _infoRow("State", store.state),
+                          _infoRow("PinCode", store.pincode),
+                          _infoRow("Owner", store.owner),
+                          _infoRow("Owner Contact", store.ownerContact),
+                          _infoRow("GST Number", store.gstNumber),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            }),
+
             const SizedBox(height: 16),
 
             /// ITEMS LIST
@@ -64,6 +141,27 @@ class ManualStockView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          Expanded(
+            child: Text(value ?? "-"),
+          ),
+        ],
       ),
     );
   }
@@ -176,12 +274,16 @@ class ManualStockView extends StatelessWidget {
               (e) => e.toLowerCase().contains(value.text.toLowerCase()),
         );
       },
+
+      /// 🔹 when user selects from dropdown
       onSelected: (selection) {
         textController.text = selection;
         controller.searchItemByNames(selection, form);
       },
+
       fieldViewBuilder: (context, fieldController, focusNode, _) {
         fieldController.text = textController.text;
+
         return TextFormField(
           controller: fieldController,
           focusNode: focusNode,
@@ -190,11 +292,17 @@ class ManualStockView extends StatelessWidget {
             isDense: true,
             hintText: "Search Item",
           ),
-          onChanged: (v) => textController.text = v,
+
+          /// 🔹 call API while typing
+          onChanged: (v) {
+            textController.text = v;
+            controller.searchItemByNames(v, form);
+          },
         );
       },
     );
   }
+
 
 
   /// 🔹 STORE DROPDOWN

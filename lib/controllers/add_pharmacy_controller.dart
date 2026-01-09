@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:propertysearch/controllers/purchase_invoice_items.dart';
 import '../data/api_calls.dart';
 import '../data/route_urls.dart';
 import '../data/shared_preferences_data.dart';
@@ -20,6 +21,8 @@ import '../model/user_pharmacy_model.dart';
 import 'dart:io';
 import 'package:dio/dio.dart' as d;
 import 'dart:core';
+
+import 'manual_stock_item_form.dart';
 
 
 
@@ -45,6 +48,20 @@ class AddPharmacyController extends GetxController {
   var isScheduled = RxnString();
   var isNarcotic = RxnString();
 
+  final RxBool isStoreExpanded = false.obs;
+
+
+  var currentPage = 0.obs;
+  var pageSize = 10.obs;
+  var totalPages = 1.obs;
+  var isFetchingMore = false.obs;
+
+  RxList<PurchaseInvoiceItems> purChaseItemForms =
+      <PurchaseInvoiceItems>[].obs;
+
+  RxList<ItemSearchModel> searchedItems =
+      <ItemSearchModel>[].obs;
+
   final Dio dio = Dio();
   // Header fields per item card
   var invoiceNos = <TextEditingController>[].obs;
@@ -61,15 +78,29 @@ class AddPharmacyController extends GetxController {
   var hsnCtrls = <TextEditingController>[].obs;
 
   // Search results per card
-  var searchedItems = <ItemSearchModel>[].obs;
+
   Timer? _debounce;
   var itemIndexes = <int>[].obs;
 
   var purchaseList = <PurchaseItem>[].obs;
 
 
+  var itemSearchLists = <String>[].obs;
+
+  void addItems() {
+    purChaseItemForms.add(PurchaseInvoiceItems());
+  }
+
+  void removeItems(int index) {
+    if (index != 0) {
+      purChaseItemForms.removeAt(index);
+    }
+  }
+
+
+
   void searchItemByName(String text) {
-    debugPrint("🟡 Typing: $text");
+    debugPrint(" Typing: $text");
 
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
@@ -94,7 +125,7 @@ class AddPharmacyController extends GetxController {
         );
 
         final response = await dio.get(
-          "http://3.111.125.81/api/item/search-by-itemname",
+          "http://3.111.125.81/api/item/search-by-itemname?",
           queryParameters: {"itemName": text},
 
         );
@@ -119,15 +150,43 @@ class AddPharmacyController extends GetxController {
   void selectItem(ItemSearchModel item, int index) {
     debugPrint("🎯 Selected Item: ${item.itemName}");
 
-    itemNameCtrls[index].text = item.itemName;
-    itemCodeCtrls[index].text = item.itemCode ?? "";
-    manufacturerCtrls[index].text = item.manufacturer ?? "";
-    brandCtrls[index].text = item.brand ?? "";
-    gstCtrls[index].text = item.gst?.toString() ?? "";
-    hsnCtrls[index].text = item.hsnGroup ?? "";
+    if (index >= purChaseItemForms.length) {
+      debugPrint(" Invalid index: $index");
+      return;
+    }
+
+    final form = purChaseItemForms[index];
+
+    form.itemName.text = item.itemName;
+    form.itemCode.text = item.itemCode ?? "";
+    form.manufacturer.text = item.manufacturer ?? "";
+    form.brand.text = item.brand ?? "";
+    form.manufacturer.text = item.manufacturer ?? "";
+    form.rack.text = item.manufacturer ?? "";
+    form.batch.text = item.manufacturer ?? "";
+    form.expiryDate.text = item.manufacturer ?? "";
+    form.manufacturer.text = item.itemCode?.toString() ?? "";
+    form.manufacturer.text = item.itemCode?.toString() ?? "";
+    form.manufacturer.text = item.itemCode?.toString() ?? "";
+    form.manufacturer.text = item.itemCode?.toString() ?? "";
+    form.manufacturer.text =
+        item.itemCode?.toString() ?? "";
 
     searchedItems.clear();
   }
+
+  // void selectItem(ItemSearchModel item, int index) {
+  //   debugPrint("🎯 Selected Item: ${item.itemName}");
+  //
+  //   itemNameCtrls[index].text = item.itemName;
+  //   itemCodeCtrls[index].text = item.itemCode ?? "";
+  //   manufacturerCtrls[index].text = item.manufacturer ?? "";
+  //   brandCtrls[index].text = item.brand ?? "";
+  //   gstCtrls[index].text = item.gst?.toString() ?? "";
+  //   hsnCtrls[index].text = item.hsnGroup ?? "";
+  //
+  //   searchedItems.clear();
+  // }
   void addItem() {
     final index = itemIndexes.length;
     itemIndexes.add(index);
@@ -180,6 +239,7 @@ class AddPharmacyController extends GetxController {
     super.onReady();
     fetchStores();
     getPharmacyDropDown();
+    addItems();
   }
 
   Future<void> deleteUser(String rackBoxStoreIdSkuId) async {
@@ -375,7 +435,7 @@ class AddPharmacyController extends GetxController {
 
       if (response.statusCode == 200) {
         Get.snackbar("Success", "Item updated successfully");
-        searchPharmacyData(item.storeId!); // refresh list
+        searchPharmacyData(item.storeId!,); // refresh list
       }
     } catch (e, s) {
       debugPrint("❌ UPDATE ERROR: $e");
@@ -383,56 +443,109 @@ class AddPharmacyController extends GetxController {
       Get.snackbar("Error", "Update failed");
     }
   }
+// . for add item we will pass userId .
+  // and search item storeId
 
-
-  Future<void> searchPharmacyData(String storeId) async {
+  Future<void> searchPharmacyData(
+      String storeId, {
+        int page = 0,
+        int size = 10,
+      }) async {
     try {
       isLoading.value = true;
-      debugPrint("🔹 searchPharmacyData started for storeId: $storeId");
 
-      // Initialize Dio
       await apiCalls.initializeDio();
-      debugPrint("🔹 Dio initialized");
 
-      // Make GET request
-      debugPrint("🔹 Callingsss API: ${RouteUrls.SearchPharmacyUser}get?storeId=$storeId");
       final response = await apiCalls.getMethod(
-        "${RouteUrls.SearchPharmacyUser}get?storeId=$storeId",
+        "${RouteUrls.SearchPharmacyUser}get"
+            "?storeId=$storeId&page=$page&size=$size",
       );
-
-      // Log status code
-      debugPrint("🔹 Response status code: ${response.statusCode}");
-
-      // Log full response body (be careful if very large)
-      debugPrint("🔹 Response datassss: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
 
-        debugPrint("🔹 JSON parsed successfully");
-
         final pharmacyStoreModel = PharmacyStoreModel.fromJson(data);
-        searchResults.value = pharmacyStoreModel.itemCodeMasters ?? [];
 
-        debugPrint("🔹 Number of stores fetched: ${searchResults.length}");
-        for (var i = 0; i < searchResults.length; i++) {
-       //   debugPrint("   🔹 Store[$i]: id=${searchResults[i].id}, name=${searchResults[i].name}, location=${searchResults[i].location}");
-        }
-      } else {
-        debugPrint(
-            " API call failed or returned null. Status code: ${response.statusCode}");
+        searchResults.value =
+            pharmacyStoreModel.itemCodeMasters ?? [];
+
+        // ✅ save pagination info
+        currentPage.value = pharmacyStoreModel.currentPage ?? 0;
+        totalPages.value = pharmacyStoreModel.totalPages ?? 1;
+        pageSize.value = pharmacyStoreModel.pageSize ?? size;
       }
-    } catch (e, s) {
-      debugPrint(" ERROR in searchPharmacyData: $e");
-      debugPrint(" STACKTRACE:\n$s");
-
-      // Optional: show a user-friendly message
+    } catch (e) {
+      debugPrint("❌ ERROR in searchPharmacyData: $e");
       Get.snackbar("Error", "Failed to fetch pharmacy data");
     } finally {
       isLoading.value = false;
-      debugPrint("🔹 searchPharmacyData finished");
+    }
+  }
+
+
+  // Future<void> searchPharmacyData(
+  //     String storeId,
+  //     ) async
+  // {
+  //   try {
+  //     isLoading.value = true;
+  //     debugPrint("🔹 searchPharmacyData started for storeId: $storeId");
+  //
+  //     // Initialize Dio
+  //     await apiCalls.initializeDio();
+  //     debugPrint("🔹 Dio initialized");
+  //
+  //     // Make GET request
+  //     debugPrint("🔹 Callingsss API: ${RouteUrls.SearchPharmacyUser}get?storeId=$storeId");
+  //     final response = await apiCalls.getMethod(
+  //       "${RouteUrls.SearchPharmacyUser}get?storeId=$storeId",
+  //     );
+  //
+  //     // Log status code
+  //     debugPrint("🔹 Response status code: ${response.statusCode}");
+  //
+  //     // Log full response body (be careful if very large)
+  //     debugPrint("🔹 Response datassss: ${response.data}");
+  //
+  //     if (response.statusCode == 200 && response.data != null) {
+  //       final data = response.data is String
+  //           ? jsonDecode(response.data)
+  //           : response.data;
+  //
+  //       debugPrint("🔹 JSON parsed successfully");
+  //
+  //       final pharmacyStoreModel = PharmacyStoreModel.fromJson(data);
+  //       searchResults.value = pharmacyStoreModel.itemCodeMasters ?? [];
+  //
+  //       debugPrint("🔹 Number of stores fetched: ${searchResults.length}");
+  //       for (var i = 0; i < searchResults.length; i++) {
+  //      //   debugPrint("   🔹 Store[$i]: id=${searchResults[i].id}, name=${searchResults[i].name}, location=${searchResults[i].location}");
+  //       }
+  //     } else {
+  //       debugPrint(
+  //           " API call failed or returned null. Status code: ${response.statusCode}");
+  //     }
+  //   } catch (e, s) {
+  //     debugPrint(" ERROR in searchPharmacyData: $e");
+  //     debugPrint(" STACKTRACE:\n$s");
+  //
+  //     // Optional: show a user-friendly message
+  //     Get.snackbar("Error", "Failed to fetch pharmacy data");
+  //   } finally {
+  //     isLoading.value = false;
+  //     debugPrint("🔹 searchPharmacyData finished");
+  //   }
+  // }
+  void loadNextPage() {
+    if (isFetchingMore.value) return;
+
+    if (currentPage.value + 1 < totalPages.value) {
+      isFetchingMore.value = true;
+      fetchStores(page: currentPage.value + 1).then((_) {
+        isFetchingMore.value = false;
+      });
     }
   }
 
@@ -555,8 +668,7 @@ class AddPharmacyController extends GetxController {
   }
 
 
-
-  Future<void> fetchStores() async {
+  Future<void> fetchStores({int page = 0, int size = 10}) async {
     debugPrint("🔥 fetchStores CALLED");
 
     try {
@@ -565,27 +677,33 @@ class AddPharmacyController extends GetxController {
       await apiCalls.initializeDio();
 
       final userId = await prefs.getUserId();
-      debugPrint("👤 USER ID: $userId");
+      if (userId.isEmpty) return;
 
-      if (userId.isEmpty) {
-        debugPrint("❌ UserId missing");
-        return;
+      final url =
+          "${RouteUrls.getPharmacyStore}?userId=$userId&page=$page&size=$size";
+
+      debugPrint("📡 API: $url");
+
+      final response = await apiCalls.getMethod(url);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        final model = PharmacyStoreModel.fromJson(data);
+
+        /// first page → replace, next pages → append
+        if (page == 0) {
+          pharmacyList.assignAll(model.itemCodeMasters ?? []);
+        } else {
+          pharmacyList.addAll(model.itemCodeMasters ?? []);
+        }
+
+        /// pagination info (from model)
+        currentPage.value = model.currentPage ?? page;
+        totalPages.value = model.totalPages ?? 0;
       }
-
-      final response = await apiCalls.getMethod(
-        "${RouteUrls.getPharmacyStore}?userId=$userId",
-      );
-
-      debugPrint("📥 RESPONSE TYPE: ${response.data.runtimeType}");
-      debugPrint("📥 RESPONSE DATA: ${response.data}");
-
-      if (response.data is Map<String, dynamic>) {
-        final model = PharmacyStoreModel.fromJson(response.data);
-        pharmacyList.assignAll(model.itemCodeMasters ?? []);
-      } else {
-        debugPrint("❌ Response is not JSON Map");
-      }
-
     } catch (e, s) {
       debugPrint("❌ ERROR: $e");
       debugPrint("🧵 STACKTRACE: $s");
@@ -593,6 +711,7 @@ class AddPharmacyController extends GetxController {
       isLoading.value = false;
     }
   }
+
 
 
   Future<void> getRackManagement() async {

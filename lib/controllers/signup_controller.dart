@@ -120,25 +120,14 @@ class SignupController extends GetxController {
   }
 
   Future<void> register() async {
-    final name = nameController.text.trim();
-    final email = emailController.text.trim();
-    final phone = phoneController.text.trim();
-    final password = passwordController.text.trim();
-    final confirmPassword = confirmPasswordController.text.trim();
-
-    if (password != confirmPassword) {
-      Get.snackbar("Error", "Passwords do not match");
-      return;
-    }
-
     try {
       isLoading.value = true;
 
-      Map<String, dynamic> data = {
-        "userFullName": name,
-        "userEmail": email,
-        "userPhoneNumber": phone,
-        "password": password,
+      final data = {
+        "userFullName": nameController.text.trim(),
+        "userEmail": emailController.text.trim(),
+        "userPhoneNumber": phoneController.text.trim(),
+        "password": passwordController.text.trim(),
         "role": "STORE_MANAGER",
         "status": "active",
         "storeAdminEmail": "test1234@gmail.com",
@@ -148,23 +137,42 @@ class SignupController extends GetxController {
         "userType": "SA"
       };
 
-      var response =
-      await apiCalls.postMethod(RouteUrls.signUPUrl, data);
+      print("📤 REQUEST: $data");
+
+      final response = await apiCalls
+          .postMethod(RouteUrls.signUPUrl, data)
+          .timeout(const Duration(seconds: 3000));
+
+      print("📥 CODE: ${response.statusCode}");
+      print("📥 BODY: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.toNamed('/otp', arguments: {
-          "email": email,
-          "phone": phone,
-        });
-      } else {
-        Get.snackbar("Error", "Unexpected response from server");
+        if (response.data['status'] == true) {
+          Get.toNamed('/otpScreen', arguments: {
+            "email": data['userEmail'],
+            "phone": data['userPhoneNumber'],
+          });
+        } else {
+          Get.snackbar("Error", response.data['message'] ?? "Failed");
+        }
+      }
+      else if (response.statusCode == 500) {
+        Get.snackbar(
+          "Server Error",
+          response.data['responseMessage'] ?? "Internal server error",
+        );
+      }
+      else {
+        Get.snackbar("Error", "Server error: ${response.statusCode}");
       }
     } catch (e) {
-      Get.snackbar("Error", "Registration failed");
+      print("❌ EXCEPTION: $e");
+      Get.snackbar("Network Error", "Check internet & try again");
     } finally {
       isLoading.value = false;
     }
   }
+
 
   @override
   void onClose() {

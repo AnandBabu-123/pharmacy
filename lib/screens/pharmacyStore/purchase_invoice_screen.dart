@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:propertysearch/controllers/manual_stock_item_form.dart';
+import 'package:propertysearch/controllers/purchase_invoice_items.dart';
 import 'package:propertysearch/controllers/sales_invoice_controller.dart';
-import 'package:propertysearch/controllers/sales_item_form.dart';
-
+import '../../controllers/add_pharmacy_controller.dart';
 import '../../model/user_pharmacy_model.dart';
 
-class SalesInvoiceView extends StatelessWidget {
-  SalesInvoiceView({super.key});
+class PurchaseInvoiceScreen extends StatelessWidget {
+  PurchaseInvoiceScreen({super.key});
 
   final SalesInVoiceController controller =
   Get.put(SalesInVoiceController());
+
+  final AddPharmacyController pharmacyController =
+  Get.put(AddPharmacyController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sales Invoice"),
+        title: const Text("PurChase Invoice"),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -32,14 +36,14 @@ class SalesInvoiceView extends StatelessWidget {
             /// STORE DROPDOWN
             _buildDropdownOnly(
               label: "Stores",
-              controller: controller,
+              controller: pharmacyController,
             ),
 
             const SizedBox(height: 8),
 
             /// 🔹 STORE DETAILS (EXPAND / COLLAPSE)
             Obx(() {
-              final store = controller.selectedStore.value;
+              final store = pharmacyController.selectedStore.value;
 
               if (store == null) return const SizedBox();
 
@@ -50,8 +54,8 @@ class SalesInvoiceView extends StatelessWidget {
                   /// 🔹 HEADER (CLICK TO TOGGLE)
                   GestureDetector(
                     onTap: () =>
-                    controller.isStoreExpanded.value =
-                    !controller.isStoreExpanded.value,
+                    pharmacyController.isStoreExpanded.value =
+                    !pharmacyController.isStoreExpanded.value,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
@@ -69,7 +73,7 @@ class SalesInvoiceView extends StatelessWidget {
                             ),
                           ),
                           Icon(
-                            controller.isStoreExpanded.value
+                            pharmacyController.isStoreExpanded.value
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                           ),
@@ -79,7 +83,7 @@ class SalesInvoiceView extends StatelessWidget {
                   ),
 
                   /// 🔹 DETAILS BODY
-                  if (controller.isStoreExpanded.value)
+                  if (pharmacyController.isStoreExpanded.value)
                     Container(
                       margin: const EdgeInsets.only(top: 6),
                       padding: const EdgeInsets.all(12),
@@ -112,7 +116,6 @@ class SalesInvoiceView extends StatelessWidget {
               );
             }),
 
-
             const SizedBox(height: 12),
 
             /// CUSTOMER ROW
@@ -122,7 +125,7 @@ class SalesInvoiceView extends StatelessWidget {
                   child: TextField(
                     controller: controller.customerNameController,
                     decoration: const InputDecoration(
-                      labelText: "Customer Name",
+                      labelText: "InVoice No",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -133,7 +136,32 @@ class SalesInvoiceView extends StatelessWidget {
                     controller: controller.customerPhoneController,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
-                      labelText: "Customer Phone Number",
+                      labelText: "Supplier Code",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10,),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller.customerNameController,
+                    decoration: const InputDecoration(
+                      labelText: "Supplier Name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: controller.customerPhoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: "Date",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -147,12 +175,16 @@ class SalesInvoiceView extends StatelessWidget {
             Expanded(
               child: Obx(() {
                 return ListView.builder(
-                  itemCount: controller.itemForms.length,
+                  physics: pharmacyController.searchedItems.isNotEmpty
+                      ? const NeverScrollableScrollPhysics()
+                      : const AlwaysScrollableScrollPhysics(),
+
+                  itemCount: pharmacyController.purChaseItemForms.length,
                   itemBuilder: (context, index) {
                     return _itemContainer(
                       context,
-                      controller,
-                      controller.itemForms[index],
+                      pharmacyController,
+                      pharmacyController.purChaseItemForms[index],
                       index,
                     );
                   },
@@ -164,7 +196,7 @@ class SalesInvoiceView extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
-                onPressed: controller.addItem,
+                onPressed: pharmacyController.addItems,
                 icon: const Icon(Icons.add),
                 label: const Text("Add Item"),
               ),
@@ -200,8 +232,8 @@ class SalesInvoiceView extends StatelessWidget {
   /// 🔹 ITEM CARD
   Widget _itemContainer(
       BuildContext context,
-      SalesInVoiceController controller,
-      SalesItemForm form,
+      AddPharmacyController pharmacyController,
+      PurchaseInvoiceItems form,
       int index,
       ) {
     return Container(
@@ -230,7 +262,7 @@ class SalesInvoiceView extends StatelessWidget {
               if (index != 0)
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => controller.removeItem(index),
+                  onPressed: () => pharmacyController.removeItems(index),
                 ),
             ],
           ),
@@ -252,7 +284,7 @@ class SalesInvoiceView extends StatelessWidget {
                   ),
                   Expanded(
                     child: entry.key == "Item Name"
-                        ? _itemAutoComplete(controller, form, entry.value)
+                        ? _itemNameSearchField(pharmacyController, form, index)
                         : TextFormField(
                       controller: entry.value,
                       decoration: const InputDecoration(
@@ -261,6 +293,7 @@ class SalesInvoiceView extends StatelessWidget {
                       ),
                     ),
                   ),
+
                 ],
               ),
             );
@@ -274,14 +307,14 @@ class SalesInvoiceView extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: () {
-               //   controller.clearItemForm(form);
+                  //   controller.clearItemForm(form);
                 },
                 child: const Text("Cancel"),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-               //   controller.saveSingleItem(form, index);
+                  //   controller.saveSingleItem(form, index);
                 },
                 child: const Text("Save"),
               ),
@@ -292,16 +325,95 @@ class SalesInvoiceView extends StatelessWidget {
     );
   }
 
+  Widget _itemNameSearchField(
+      AddPharmacyController c,
+      PurchaseInvoiceItems form,
+      int index,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        /// 🔍 SEARCH FIELD
+        TextFormField(
+          controller: form.fields["Item Name"],
+          decoration: const InputDecoration(
+            hintText: "Search Item",
+            border: OutlineInputBorder(),
+            isDense: true,
+          ),
+          onChanged: (val) {
+            if (val.length >= 2) {
+              c.searchItemByName(val);   // 🔹 API CALL
+            }
+          },
+        ),
+
+        /// 🔽 RESULT LIST
+        Obx(() {
+          if (c.searchedItems.isEmpty) return const SizedBox();
+
+          return Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              margin: const EdgeInsets.only(top: 4),
+              constraints: const BoxConstraints(maxHeight: 200),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: c.searchedItems.length,
+                itemBuilder: (context, i) {
+                  final item = c.searchedItems[i];
+                  return InkWell(
+                    onTap: () {
+                      c.selectItem(item, index);   // ✅ now tap works
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.itemName,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          if (item.itemCode != null)
+                            Text(
+                              item.itemCode!,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        })
+
+    ],
+    );
+  }
+
+
   /// 🔹 AUTOCOMPLETE FIELD (FIXED)
   Widget _itemAutoComplete(
-      SalesInVoiceController controller,
-      SalesItemForm form,
+      AddPharmacyController controller,
+      ManualStockItemForm form,
       TextEditingController textController,
       ) {
     return Autocomplete<String>(
       optionsBuilder: (value) {
         if (value.text.isEmpty) return const Iterable.empty();
-        return controller.itemSearchList.where(
+        return pharmacyController.itemSearchLists.where(
               (e) => e.toLowerCase().contains(value.text.toLowerCase()),
         );
       },
@@ -309,7 +421,7 @@ class SalesInvoiceView extends StatelessWidget {
         textController.text = selection;
 
         /// 🔹 AUTO-FILL ITEM DETAILS
-        controller.searchItemByName(selection, form);
+        controller.searchItemByName(selection);
       },
       fieldViewBuilder: (context, fieldController, focusNode, _) {
         fieldController.text = textController.text;
@@ -330,13 +442,14 @@ class SalesInvoiceView extends StatelessWidget {
   /// 🔹 STORE DROPDOWN
   Widget _buildDropdownOnly({
     required String label,
-    required SalesInVoiceController controller,
+    required AddPharmacyController controller,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+            style:
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         const SizedBox(height: 4),
         Obx(() {
           return DropdownButtonFormField<Stores>(
@@ -345,21 +458,25 @@ class SalesInvoiceView extends StatelessWidget {
             isExpanded: true,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
+              isDense: true,
             ),
             items: controller.storesList
                 .map(
                   (store) => DropdownMenuItem<Stores>(
                 value: store,
-                child: Text("${store.id} - ${store.name}"),
+                child: Text(
+                  "${store.id ?? ""} - ${store.name ?? ""}",
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             )
                 .toList(),
-            onChanged: (value) =>
-            controller.selectedStore.value = value,
+            onChanged: (value) => controller.selectedStore.value = value,
           );
         }),
       ],
     );
   }
+
 }
 

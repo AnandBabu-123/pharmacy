@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -9,20 +11,24 @@ import '../model/store_business_type.dart';
 import '../model/store_category.dart';
 import '../model/store_details.dart';
 import '../model/store_details_model.dart';
+import '../model/storelist_response.dart';
 
 
 class DashboardController extends GetxController {
   final ApiCalls apiCalls = ApiCalls();
   final SharedPreferencesData prefs = SharedPreferencesData();
+  var stores = <StoreItem>[].obs;
 
   var email = "";
   var isLoading = false.obs;
   var storeList = <Stores>[].obs;
+  late final businessTypeId = selectedStoreCategory.value?.storeBusinessType;
+  late final storeVerificationStatus = selectedStore.value?.storeVerifiedStatus.toString() ?? "false";
 
   var storeCategories = <StoreCategory>[].obs;
   var selectedStoreCategory = Rxn<StoreCategory>();
 
-
+  var selectedStore = Rxn<StoreItem>();
   var allBusinessTypes = <StoreBusinessType>[].obs;
   var filteredBusinessTypes = <StoreBusinessType>[].obs;
   var selectedBusinessType = Rxn<StoreBusinessType>();
@@ -76,6 +82,39 @@ class DashboardController extends GetxController {
     mobileNumberController.text= mobileNumber;
   }
 
+  void onStoreSelected(StoreItem? store) async {
+
+    if (store == null) return;
+
+    selectedStore.value = store;
+
+
+
+    /// 🔹 Autofill fields
+    storeName.text = store.name;
+    pincodeController.text = store.pincode;
+    districtController.text = store.district;
+    stateController.text = store.state;
+    townController.text = store.location;
+    userNameController.text = store.owner;
+    mobileNumberController.text = store.ownerContact;
+    emailController.text = store.ownerEmail;
+    gstController.text = store.gstNumber;
+
+    /// 🔹 STATUS LOGIC
+    if (store.status == "ACTIVE") {
+      // isEditable.value = false;     // 🔒 lock fields
+      // isActiveStore.value = true;  // for UI color
+    } else {
+      // isEditable.value = true;     // ✏️ allow edit
+      // isActiveStore.value = false;
+    }
+
+    /// 🔹 SAVE SELECTED STORE ID
+    await prefs.saveStoredUserId(store.userIdStoreId);
+
+    debugPrint("💾 Stored Selected userIdStoreId => ${store.userIdStoreId}");
+  }
 
   Future<void> createStoreDetails() async {
     try {
@@ -206,6 +245,17 @@ class DashboardController extends GetxController {
       isLoading.value = false;
     }
   }
+  String getBusinessName(String? businessTypeId) {
+    if (businessTypeId == null || businessTypeId.isEmpty) return "-";
+
+    final match = allBusinessTypes.firstWhereOrNull(
+          (e) => e.businessTypeId == businessTypeId,
+    );
+
+    return match?.businessName ?? businessTypeId;
+    // fallback shows DT/RT if name not found
+  }
+
 
   Future<void> fetchStoreBusinessType() async {
     try {
@@ -267,6 +317,94 @@ class DashboardController extends GetxController {
       print(" StackTrace: $stack");
     }
   }
+
+  Future<void> updateStoreDetails() async {
+    try {
+      isLoading.value = true;
+
+      final userId = await prefs.getUserId();
+      debugPrint(" USER ID => $userId");
+
+      if (selectedStore.value == null) {
+        Get.snackbar("Error", "Please select a store");
+        return;
+      }
+
+      if (selectedBusinessType.value == null) {
+        Get.snackbar("Error", "Please select business type");
+        return;
+      }
+
+      final store = selectedStore.value!;
+      final businessType = selectedBusinessType.value!;
+
+      final Map<String, dynamic> data = {
+        "storeType": store.type,
+        "id": store.id,
+        "name": storeName.text.trim(),
+        "pincode": pincodeController.text.trim(),
+        "district": districtController.text.trim(),
+        "location": townController.text.trim(),
+        "town": townController.text.trim(),
+        "state": stateController.text.trim(),
+        "gstNumber": gstController.text.trim(),
+        "owner": userNameController.text.trim(),
+        "ownerAddress": "hyderabad",
+        "ownerContact": mobileNumberController.text.trim(),
+        "secondaryContact": store.secondaryContact ?? "",
+        "ownerEmail": emailController.text.trim(),
+        "storeVerificationStatus": storeVerificationStatus,
+
+        /// ✅ HERE IS THE FIX
+        "businessType": businessType.businessName,
+      };
+
+      debugPrint("📦 REQUEST BODY:");
+      debugPrint(const JsonEncoder.withIndent('  ').convert(data));
+
+      final response = await apiCalls.putMethod(
+        RouteUrls.updateStoreDetails,
+        data,
+      );
+
+      debugPrint("📥 RESPONSE:");
+      debugPrint(response.data.toString());
+
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+
+        final bool isSuccess =
+            resData['status'] == true ||
+                (resData['message'] != null &&
+                    resData['message']
+                        .toString()
+                        .toLowerCase()
+                        .contains("success"));
+
+        if (isSuccess) {
+          Get.snackbar(
+            "Success",
+            resData['message'] ?? "Store updated successfully",
+          );
+        } else {
+          Get.snackbar(
+            "Error",
+            resData['responseMessage'] ??
+                resData['message'] ??
+                "Update failed",
+          );
+        }
+      } else {
+        Get.snackbar("Error", "Failed to update store");
+      }
+    } catch (e) {
+      debugPrint("❌ updateStoreDetails error: $e");
+      Get.snackbar("Error", "Something went wrong");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
 }
 

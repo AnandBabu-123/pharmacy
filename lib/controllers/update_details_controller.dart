@@ -307,9 +307,6 @@ class UpdateDetailsController extends GetxController {
 
   void onStoreSelected(StoreItem? store) async {
 
-
-
-
     if (store == null) return;
 
     selectedStore.value = store;

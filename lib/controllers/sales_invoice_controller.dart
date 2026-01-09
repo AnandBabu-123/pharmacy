@@ -24,6 +24,7 @@ class SalesInVoiceController extends GetxController{
   var selectedStore = Rxn<Stores>();
   final RxBool isLoading = false.obs;
 
+  final RxBool isStoreExpanded = false.obs;
 
   final RxList<EditablePriceItem> priceList =
       <EditablePriceItem>[].obs;
@@ -42,7 +43,16 @@ class SalesInVoiceController extends GetxController{
   late Dio dio;
 
   var manualItemForms = <ManualStockItemForm>[].obs;
-  var itemSearchLists = <String>[].obs;
+  final RxList<String> itemSearchLists = <String>[].obs;
+
+
+  late ManualStockItemForm defaultForm;
+
+  @override
+  void onInit() {
+    super.onInit();
+    defaultForm = ManualStockItemForm();
+  }
 
   void addItem() {
     itemForms.add(SalesItemForm());
@@ -72,6 +82,7 @@ class SalesInVoiceController extends GetxController{
     searchItem();
     addItem();
     addItems();
+    searchItemByNames("", defaultForm);
   }
 
   Future<void> gstReport() async {
@@ -424,77 +435,58 @@ class SalesInVoiceController extends GetxController{
   }
 
 
-  Future<void> searchItemByNames(
-      String itemName,
-      ManualStockItemForm form,
-      ) async
-  {
+  Future<void> searchItemByNames(String itemName, ManualStockItemForm form) async {
     try {
       await apiCalls.initializeDio();
 
       final response = await apiCalls.getMethod(
-          "${RouteUrls.searchManualStockByName}?itemName=$itemName"
-
-
+        "${RouteUrls.searchManualStockByName}?itemName=$itemName",
       );
-      debugPrint("⬅ Status Codssse: ${response.statusCode}");
-      debugPrint("⬅ Responsessss: ${response.data}");
+
+      debugPrint("⬅ Status Code: ${response.statusCode}");
+      debugPrint("⬅ Response: ${response.data}");
+
       if (response.statusCode == 200 && response.data != null) {
-        final json = response.data is String
+        final List list = response.data is String
             ? jsonDecode(response.data)
             : response.data;
 
-        final List list = json['data'] ?? [];
+        /// 🔹 1. Fill autocomplete list
+        itemSearchLists.clear();
+        itemSearchLists.addAll(
+          list.map((e) => (e['itemName'] ?? "").toString().trim()).toList(),
+        );
 
-        /// 🔴 If API returns nothing → clear fields
+        /// 🔹 2. If user just typing → don't auto fill yet
+        if (form.itemName.text != itemName) return;
+
+        /// 🔹 3. If nothing returned
         if (list.isEmpty) {
           form.clear();
           form.itemName.text = itemName;
           return;
         }
 
+        /// 🔹 4. Autofill using first result
         final item = ManualStockModel.fromJson(list.first);
 
-        /// ✅ SAFE AUTO FILL (null → "")
-        form.itemName.text = item.itemName ?? itemName;
+        form.itemName.text = item.itemName?.trim() ?? itemName;
         form.itemCode.text = item.itemCode ?? "";
         form.manufacturer.text = item.manufacturer ?? "";
-        // form.manufacturerName.text = item.mfName ?? "";
-        // form.supplier.text = item.supplierName ?? "";
-        // form.rack.text = item.rack ?? "";
-        // form.batch.text = item.batch ?? "";
-        //
-        // form.balQty.text = item.balQuantity?.toString() ?? "";
-        // form.balPackQty.text = item.balPackQuantity?.toString() ?? "";
-        // form.balLoose.text = item.balLooseQuantity?.toString() ?? "";
-        //
-        // form.mrpPack.text = item.mrpPack?.toString() ?? "";
-        // form.purRate.text = item.purRatePerPackAfterGST?.toString() ?? "";
-        // form.mrpValue.text = item.mrpValue?.toString() ?? "";
-        //
-        // form.category.text = item.itemCategory ?? "";
-        // form.online.text = item.onlineYesNo ?? "";
-        //
-        // form.stockValueMRP.text = item.stockValueMrp?.toString() ?? "";
-        // form.stockValuePurRate.text =
-        //     item.stockValuePurrate?.toString() ?? "";
-        //
-        // if (item.expiryDate != null) {
-        //   form.expiryDate.text =
-        //       item.expiryDate!.toIso8601String().split('T').first;
-        // } else {
-        //   form.expiryDate.clear();
-        // }
+        // form.brand.text = item.brand ?? "";
+        // form.gst.text = item.gst?.toString() ?? "";
+        // form.hsn.text = item.hsnGroup ?? "";
       }
     } catch (e, s) {
-      debugPrint("Item Search Error: $e");
-      debugPrint("$s");
+      debugPrint("❌ Item Search Error: $e");
+      debugPrint("🧵 $s");
 
-      /// if error → don’t crash, just clear
       form.clear();
       form.itemName.text = itemName;
     }
   }
+
+
 
 
   Future<void> getPharmacyDropDown() async {

@@ -96,84 +96,148 @@ class SearchPharmacyUser extends StatelessWidget {
                   return const Center(child: Text("No data found"));
                 }
 
-                return ListView.separated(
-                  itemCount: pharmacyController.searchResults.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final item = pharmacyController.searchResults[index];
+                return Column(
+                  children: [
+                    /// 🔹 LIST
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: pharmacyController.searchResults.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final item = pharmacyController.searchResults[index];
 
-                    return Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            /// 🔹 ITEM HEADER
-                            Text(
-                              item.itemName ?? "-",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          return Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-
-                            const SizedBox(height: 8),
-
-                            /// 🔹 ITEM DETAILS
-                            _infoRow("Store ID", item.storeId),
-                            _infoRow("Item Code", item.itemCode),
-                            _infoRow("Category", item.itemCategory),
-                            _infoRow("Sub Category", item.itemSubCategory),
-                            _infoRow("Manufacturer", item.manufacturer),
-                            _infoRow("Brand", item.brand),
-                            _infoRow("GST", item.gst?.toString()),
-
-                            const Divider(height: 20),
-
-                            /// 🔹 ACTION BUTTONS
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                OutlinedButton(
-                                  onPressed: () {
-                                    _openUpdateItemBottomSheet(context, item);
-                                  },
-                                  child: const Text("Update"),
-                                ),
-                                const SizedBox(width: 10),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _openUploadBottomSheet(context, item);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 18,
-                                      vertical: 10,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.itemName ?? "-",
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  child: const Text("Upload"),
-                                ),
-                              ],
+
+                                  const SizedBox(height: 8),
+
+                                  _infoRow("Store ID", item.storeId),
+                                  _infoRow("Item Code", item.itemCode),
+                                  _infoRow("Category", item.itemCategory),
+                                  _infoRow("Sub Category", item.itemSubCategory),
+                                  _infoRow("Manufacturer", item.manufacturer),
+                                  _infoRow("Brand", item.brand),
+                                  _infoRow("GST", item.gst?.toString()),
+
+                                  const Divider(height: 20),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      OutlinedButton(
+                                        onPressed: () {
+                                          _openUpdateItemBottomSheet(context, item);
+                                        },
+                                        child: const Text("Update"),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _openUploadBottomSheet(context, item);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 18,
+                                            vertical: 10,
+                                          ),
+                                        ),
+                                        child: const Text("Upload"),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+
+                    /// 🔹 PAGINATION BAR
+                    _paginationBar(),
+                  ],
                 );
               }),
             ),
+
 
           ],
         ),
       ),
     );
+  }
+  Widget _paginationBar() {
+    return Obx(() {
+      final controller = pharmacyController;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            /// ◀ PREVIOUS
+            ElevatedButton(
+              onPressed: controller.currentPage.value > 0
+                  ? () {
+                final store =
+                    controller.selectedStore.value;
+                if (store != null) {
+                  controller.searchPharmacyData(
+                    store.id!,
+                    page: controller.currentPage.value - 1,
+                    size: controller.pageSize.value,
+                  );
+                }
+              }
+                  : null,
+              child: const Text("Prev"),
+            ),
+
+            /// PAGE INFO
+            Text(
+              "Page ${controller.currentPage.value + 1} "
+                  "of ${controller.totalPages.value}",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            /// NEXT ▶
+            ElevatedButton(
+              onPressed: controller.currentPage.value <
+                  controller.totalPages.value - 1
+                  ? () {
+                final store =
+                    controller.selectedStore.value;
+                if (store != null) {
+                  controller.searchPharmacyData(
+                    store.id!,
+                    page: controller.currentPage.value + 1,
+                    size: controller.pageSize.value,
+                  );
+                }
+              }
+                  : null,
+              child: const Text("Next"),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   /// 🔹 STORE DROPDOWN

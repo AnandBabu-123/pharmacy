@@ -50,7 +50,8 @@ class AddPharmacy extends StatelessWidget {
       body: Container(
         color: const Color(0xFFF1F8E9),
         child: Obx(() {
-          if (pharmacyController.isLoading.value) {
+          if (pharmacyController.isLoading.value &&
+              pharmacyController.pharmacyList.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -63,52 +64,79 @@ class AddPharmacy extends StatelessWidget {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: pharmacyController.pharmacyList.length,
-            itemBuilder: (context, index) {
-              final store = pharmacyController.pharmacyList[index];
-
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-
-                      /// STORE NAME
-                      Text(
-                        "Name : ${store.itemName ?? ""}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      _buildRow("Location", store.storeId),
-                      _buildRow("Owner", store.brand),
-                      _buildRow("Contact", store.itemCategory),
-                      _buildRow("PinCode", store.itemCode),
-                      _buildRow("District", store.itemSubCategory),
-                      _buildRow("State", store.manufacturer),
-                      _buildRow("Date", store.narcotic),
-                      _buildRow("Role", store.itemCode ?? "-"),
-                    ],
-                  ),
-                ),
-              );
-
+          return NotificationListener<ScrollNotification>(
+            onNotification: (scrollInfo) {
+              if (!pharmacyController.isLoading.value &&
+                  !pharmacyController.isFetchingMore.value &&
+                  scrollInfo.metrics.pixels ==
+                      scrollInfo.metrics.maxScrollExtent) {
+                pharmacyController.loadNextPage(); // 🔥 pagination call
+              }
+              return true;
             },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: pharmacyController.pharmacyList.length + 1,
+              itemBuilder: (context, index) {
+                /// 🔹 LOADER AT BOTTOM
+                if (index == pharmacyController.pharmacyList.length) {
+                  return Obx(() {
+                    return pharmacyController.isFetchingMore.value
+                        ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                        : const SizedBox();
+                  });
+                }
+
+                final store = pharmacyController.pharmacyList[index];
+
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// STORE NAME
+                        Text(
+                          "Name : ${store.itemName ?? ""}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        _buildRow("Store ID", store.storeId),
+                        _buildRow("Item Code", store.itemCode),
+                        _buildRow("Item Name", store.itemName),
+                        _buildRow("Category", store.itemCategory),
+                        _buildRow("Sub Category", store.itemSubCategory),
+                        _buildRow("Manufacturer", store.manufacturer),
+                        _buildRow("Brand", store.brand),
+
+                        /// ✅ GST is int → convert safely
+                        _buildRow("GST %", store.gst?.toString()),
+
+                        _buildRow("HSN Code", store.hsnGroup),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           );
         }),
       ),
+
 
       /// ➕ FAB
       floatingActionButton: FloatingActionButton.extended(
@@ -117,7 +145,7 @@ class AddPharmacy extends StatelessWidget {
           _openAddStoreBottomSheet(context);
         },
         icon: const Icon(Icons.add),
-        label: const Text("Add Store"),
+        label: const Text("Add Item"),
       ),
     );
   }
@@ -250,7 +278,7 @@ class AddPharmacy extends StatelessWidget {
         children: [
           /// LEFT LABEL
           SizedBox(
-            width: 90, // controls left alignment
+            width: 140, // controls left alignment
             child: Text(
               "$label :",
               style: const TextStyle(
