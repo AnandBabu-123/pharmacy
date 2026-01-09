@@ -147,22 +147,25 @@ class SignupController extends GetxController {
       print("📥 BODY: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data['status'] == true) {
-          Get.toNamed('/otpScreen', arguments: {
-            "email": data['userEmail'],
-            "phone": data['userPhoneNumber'],
-          });
-        } else {
-          Get.snackbar("Error", response.data['message'] ?? "Failed");
-        }
-      }
-      else if (response.statusCode == 500) {
+
+        // ✅ SUCCESS → Go to OTP screen
+        Get.toNamed('/otpScreen', arguments: {
+          "email": data['userEmail'],
+          "phone": data['userPhoneNumber'],
+        });
+
+        Get.snackbar(
+          "Success",
+          response.data['responseMessage'] ??
+              "OTP sent successfully",
+        );
+
+      } else if (response.statusCode == 500) {
         Get.snackbar(
           "Server Error",
           response.data['responseMessage'] ?? "Internal server error",
         );
-      }
-      else {
+      } else {
         Get.snackbar("Error", "Server error: ${response.statusCode}");
       }
     } catch (e) {
@@ -172,6 +175,7 @@ class SignupController extends GetxController {
       isLoading.value = false;
     }
   }
+
 
 
   @override
