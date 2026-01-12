@@ -19,16 +19,21 @@ class DashboardController extends GetxController {
   final SharedPreferencesData prefs = SharedPreferencesData();
   var stores = <StoreItem>[].obs;
 
+  RxList<Stores> storeList = <Stores>[].obs;
+  Rx<Stores?> selectedStore = Rx<Stores?>(null);
+  RxBool canEdit = true.obs;
+
+
   var email = "";
   var isLoading = false.obs;
-  var storeList = <Stores>[].obs;
+
   late final businessTypeId = selectedStoreCategory.value?.storeBusinessType;
   late final storeVerificationStatus = selectedStore.value?.storeVerifiedStatus.toString() ?? "false";
 
   var storeCategories = <StoreCategory>[].obs;
   var selectedStoreCategory = Rxn<StoreCategory>();
 
-  var selectedStore = Rxn<StoreItem>();
+
   var allBusinessTypes = <StoreBusinessType>[].obs;
   var filteredBusinessTypes = <StoreBusinessType>[].obs;
   var selectedBusinessType = Rxn<StoreBusinessType>();
@@ -53,6 +58,34 @@ class DashboardController extends GetxController {
 
 
 
+  var isVerified = false.obs;
+
+  var isActiveStore = false.obs;
+  var isVerifiedStore = false.obs;
+
+
+
+
+
+  final RxBool _canEdit = true.obs;
+
+
+
+
+  final storeNameCtrl = TextEditingController();
+  final locationCtrl = TextEditingController();
+  final stateCtrl = TextEditingController();
+  final districtCtrl = TextEditingController();
+  final gstCtrl = TextEditingController();
+  final pincodeCtrl = TextEditingController();
+  final townCtrl = TextEditingController();
+  final ownerCtrl = TextEditingController();
+  final ownerAddressCtrl = TextEditingController();
+  final ownerContactCtrl = TextEditingController();
+  final alternateContactCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+
+
   @override
   void onReady() {
     super.onReady();
@@ -71,6 +104,38 @@ class DashboardController extends GetxController {
     OwnerAddressContactController.dispose();
     super.onClose();
   }
+  void setEditPermission(bool value) {
+    _canEdit.value = value;
+  }
+
+  void onStoreSelected(Stores? store) {
+    if (store == null) return;
+
+    selectedStore.value = store;
+
+    // verified
+    isVerified.value =
+        store.storeVerifiedStatus == true ||
+            store.storeVerifiedStatus == "true";
+
+    // fill fields
+    storeNameCtrl.text = store.name ?? "";
+    locationCtrl.text = store.location ?? "";
+    stateCtrl.text = store.state ?? "";
+    districtCtrl.text = store.district ?? "";
+    gstCtrl.text = store.gstNumber ?? "";
+    pincodeCtrl.text = store.pincode ?? "";
+    townCtrl.text = store.district ?? "";
+    ownerCtrl.text = store.owner ?? "";
+    ownerAddressCtrl.text = store.location ?? "";
+    ownerContactCtrl.text = store.ownerContact ?? "";
+    alternateContactCtrl.text = store.secondaryContact ?? "";
+    emailCtrl.text = store.ownerEmail ?? "";
+
+    // edit permission
+    canEdit.value = store.status != "ACTIVE";
+  }
+
 
 
   Future<void> loadDetails() async {
@@ -82,39 +147,6 @@ class DashboardController extends GetxController {
     mobileNumberController.text= mobileNumber;
   }
 
-  void onStoreSelected(StoreItem? store) async {
-
-    if (store == null) return;
-
-    selectedStore.value = store;
-
-
-
-    /// 🔹 Autofill fields
-    storeName.text = store.name;
-    pincodeController.text = store.pincode;
-    districtController.text = store.district;
-    stateController.text = store.state;
-    townController.text = store.location;
-    userNameController.text = store.owner;
-    mobileNumberController.text = store.ownerContact;
-    emailController.text = store.ownerEmail;
-    gstController.text = store.gstNumber;
-
-    /// 🔹 STATUS LOGIC
-    if (store.status == "ACTIVE") {
-      // isEditable.value = false;     // 🔒 lock fields
-      // isActiveStore.value = true;  // for UI color
-    } else {
-      // isEditable.value = true;     // ✏️ allow edit
-      // isActiveStore.value = false;
-    }
-
-    /// 🔹 SAVE SELECTED STORE ID
-    await prefs.saveStoredUserId(store.userIdStoreId);
-
-    debugPrint("💾 Stored Selected userIdStoreId => ${store.userIdStoreId}");
-  }
 
   Future<void> createStoreDetails() async {
     try {
@@ -200,10 +232,10 @@ class DashboardController extends GetxController {
     }
   }
 
-
-
   void onStoreCategoryChanged(StoreCategory? category) {
     selectedStoreCategory.value = category;
+
+    // Clear previous selection
     selectedBusinessType.value = null;
 
     if (category == null) {
@@ -218,12 +250,39 @@ class DashboardController extends GetxController {
     /// Else → show ONLY Retailer
     else {
       filteredBusinessTypes.assignAll(
-        allBusinessTypes
-            .where((e) => e.businessName == "Retailer")
-            .toList(),
+        allBusinessTypes.where((e) => e.businessName == "Retailer").toList(),
       );
     }
+
+    // ✅ Automatically select the first available business type
+    if (filteredBusinessTypes.isNotEmpty) {
+      selectedBusinessType.value = filteredBusinessTypes.first;
+    }
   }
+
+
+  // void onStoreCategoryChanged(StoreCategory? category) {
+  //   selectedStoreCategory.value = category;
+  //   selectedBusinessType.value = null;
+  //
+  //   if (category == null) {
+  //     filteredBusinessTypes.clear();
+  //     return;
+  //   }
+  //
+  //   /// If Pharmacy → show ALL business types
+  //   if (category.storeCategoryName == "Pharmacy") {
+  //     filteredBusinessTypes.assignAll(allBusinessTypes);
+  //   }
+  //   /// Else → show ONLY Retailer
+  //   else {
+  //     filteredBusinessTypes.assignAll(
+  //       allBusinessTypes
+  //           .where((e) => e.businessName == "Retailer")
+  //           .toList(),
+  //     );
+  //   }
+  // }
 
 
   Future<void> fetchStoreCategory() async {
