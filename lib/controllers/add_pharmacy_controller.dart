@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:propertysearch/controllers/purchase_invoice_items.dart';
 import '../data/api_calls.dart';
@@ -63,11 +64,11 @@ class AddPharmacyController extends GetxController {
       <ItemSearchModel>[].obs;
 
   final Dio dio = Dio();
-  // Header fields per item card
-  var invoiceNos = <TextEditingController>[].obs;
-  var supplierCodes = <TextEditingController>[].obs;
-  var supplierNames = <TextEditingController>[].obs;
-  var purchaseDates = <TextEditingController>[].obs;
+
+  final invoiceNoCtrl = TextEditingController();
+  final supplierCodeCtrl = TextEditingController();
+  final supplierNameCtrl = TextEditingController();
+  final purchaseDateCtrl = TextEditingController();
 
   // Item fields
   var itemNameCtrls = <TextEditingController>[].obs;
@@ -97,6 +98,81 @@ class AddPharmacyController extends GetxController {
     }
   }
 
+  Future<void> addPurChaseInvoice() async {
+    try {
+      final accessToken = await prefs.getAccessToken();
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: "http://3.111.125.81/",
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      final body = {
+        "storeId": selectedStore.value?.id,
+
+        // 🔹 HEADER (only once)
+        "invoiceNo": invoiceNoCtrl.text,
+        "supplierCode": supplierCodeCtrl.text,
+        "supplierName": supplierNameCtrl.text,
+        "purchaseDate": purchaseDateCtrl.text,
+
+        // 🔹 ITEM LIST
+        "detailRequests": List.generate(purChaseItemForms.length, (index) {
+          final f = purChaseItemForms[index];
+
+          return {
+            "itemCode": f.itemCode.text,
+            "itemName": f.itemName.text,
+            "mfacName": f.manufacturer.text,
+            "brandName": f.brand.text,
+            "batchNo": f.batchNo.text,
+            "expiryDate": f.expiryDate.text,
+
+            "mrp": double.tryParse(f.mrpPurchase.text) ?? 0,
+            "purRate": double.tryParse(f.purchaseRate.text) ?? 0,
+            "discount": double.tryParse(f.discount.text) ?? 0,
+            "afterDiscount": double.tryParse(f.afterDiscount.text) ?? 0,
+
+            "igstPer": double.tryParse(f.igstCtrl.text) ?? 0,
+            "sgstPer": double.tryParse(f.sgstCtrl.text) ?? 0,
+            "cgstPer": double.tryParse(f.cgstCtrl.text) ?? 0,
+
+            "igstAmount": double.tryParse(f.IGSTAmount.text) ?? 0,
+            "sgstAmount": double.tryParse(f.SGSTAmount.text) ?? 0,
+            "cgstAmount": double.tryParse(f.CGSTAmount.text) ?? 0,
+
+            "totalPurchasePrice":
+            double.tryParse(f.totalPurchasePrice.text) ?? 0,
+
+            "looseQty": int.tryParse(f.looseQty.text) ?? 0,
+            "qtyOrBox": int.tryParse(f.boxQty.text) ?? 0,
+            "packQty": int.tryParse(f.packQty.text) ?? 0,
+          };
+        }),
+      };
+
+
+      final response = await dio.post(
+        "purchase/add",
+        data: body,
+      );
+      debugPrint("📤 REQUEST BODY: $body");
+
+      debugPrint("📥 Upload Response: ${response.data}");
+
+      Get.snackbar("Success", "Purchase Invoice Added",
+          backgroundColor: Colors.green.shade100);
+    } catch (e) {
+      debugPrint("❌ API ERROR: $e");
+      Get.snackbar("Error", "Failed to save invoice",
+          backgroundColor: Colors.red.shade100);
+    }
+  }
 
 
   void searchItemByName(String text) {
@@ -161,19 +237,24 @@ class AddPharmacyController extends GetxController {
     form.itemCode.text = item.itemCode ?? "";
     form.manufacturer.text = item.manufacturer ?? "";
     form.brand.text = item.brand ?? "";
-    form.manufacturer.text = item.manufacturer ?? "";
-    form.rack.text = item.manufacturer ?? "";
-    form.batch.text = item.manufacturer ?? "";
-    form.expiryDate.text = item.manufacturer ?? "";
-    form.manufacturer.text = item.itemCode?.toString() ?? "";
-    form.manufacturer.text = item.itemCode?.toString() ?? "";
-    form.manufacturer.text = item.itemCode?.toString() ?? "";
-    form.manufacturer.text = item.itemCode?.toString() ?? "";
-    form.manufacturer.text =
-        item.itemCode?.toString() ?? "";
+    // form.manufacturer.text = item.manufacturer ?? "";
+    // form.rack.text = item.manufacturer ?? "";
+    form.gstCtrl.text = item.gst.toString() ?? "";
+    form.hSNCode.text = item.hsnGroup ?? "";
+    form.igstCtrl.text = item.gst.toString() ?? "";
+    // form.expiryDate.text = item.manufacturer ?? "";
+    // form.manufacturer.text = item.itemCode?.toString() ?? "";
+    // form.manufacturer.text = item.itemCode?.toString() ?? "";
+    // form.manufacturer.text = item.itemCode?.toString() ?? "";
+    // form.manufacturer.text = item.itemCode?.toString() ?? "";
+    // form.manufacturer.text =
+    //     item.itemCode?.toString() ?? "";
 
     searchedItems.clear();
   }
+
+  // form.batchNo.text = item.hsnGroup ?? "";
+
 
   // void selectItem(ItemSearchModel item, int index) {
   //   debugPrint("🎯 Selected Item: ${item.itemName}");
@@ -191,11 +272,7 @@ class AddPharmacyController extends GetxController {
     final index = itemIndexes.length;
     itemIndexes.add(index);
 
-    // Create controllers for this card
-    invoiceNos.add(TextEditingController());
-    supplierCodes.add(TextEditingController());
-    supplierNames.add(TextEditingController());
-    purchaseDates.add(TextEditingController());
+
 
     itemNameCtrls.add(TextEditingController());
     itemCodeCtrls.add(TextEditingController());
@@ -208,10 +285,6 @@ class AddPharmacyController extends GetxController {
   void removeItem(int index) {
     itemIndexes.remove(index);
 
-    invoiceNos.removeAt(index);
-    supplierCodes.removeAt(index);
-    supplierNames.removeAt(index);
-    purchaseDates.removeAt(index);
 
     itemNameCtrls.removeAt(index);
     itemCodeCtrls.removeAt(index);

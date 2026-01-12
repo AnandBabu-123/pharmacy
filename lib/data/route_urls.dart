@@ -33,5 +33,7 @@ static const String addPriceManage ="api/item-offer/add";
 static const String postsale = "sale/add";
 static const String gstReport = "purchase/gst-sale-purchase-summary";
 static const String customerManagement = "customerRegister";
+static const String searchCustomerOrder ="get-orderId-by-search?";
+static const String addPurchaseVoice ="purchase/add";
 
 }

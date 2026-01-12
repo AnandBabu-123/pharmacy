@@ -158,14 +158,14 @@ class PurcahseInvoiceView extends StatelessWidget {
               Expanded(
                 child: _rows(
                   "Invoice No",
-                  _textFieldControllers(c.invoiceNos[index]),
+                  _textFieldControllers(c.invoiceNoCtrl),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _rows(
                   "Supplier Code",
-                  _textFieldControllers(c.supplierCodes[index]),
+                  _textFieldControllers(c.supplierCodeCtrl),
                 ),
               ),
             ],
@@ -176,18 +176,19 @@ class PurcahseInvoiceView extends StatelessWidget {
               Expanded(
                 child: _rows(
                   "Supplier Name",
-                  _textFieldControllers(c.supplierNames[index]),
+                  _textFieldControllers(c.supplierNameCtrl),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _rows(
                   "Purchase Date",
-                  _textFieldControllers(c.purchaseDates[index]),
+                  _textFieldControllers(c.purchaseDateCtrl),
                 ),
               ),
             ],
           ),
+
 
           const SizedBox(height: 12),
 

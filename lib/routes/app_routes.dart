@@ -7,6 +7,7 @@ import 'package:propertysearch/screens/forgot_password/forgot_password.dart';
 import 'package:propertysearch/screens/get_store_user_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_pharmacy.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_rack_management.dart';
+import 'package:propertysearch/screens/pharmacyStore/customer_order.dart';
 import 'package:propertysearch/screens/pharmacyStore/custore_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_purchase_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_rock_management.dart';
@@ -53,6 +54,7 @@ class AppRoutes {
    static const gstReport ="/gstReport";
    static const customerManagement = "/customerManagement";
    static const purchaseScreen ="/purchaseScreen";
+   static const customerOrderView = "/customerOrderView";
 
 
   static final routes = [
@@ -80,6 +82,7 @@ class AppRoutes {
     GetPage(name: gstReport, page: () => GstReportView()),
     GetPage(name: customerManagement, page: () => CustomerManagement()),
     GetPage(name: purchaseScreen, page: () => PurchaseInvoiceScreen()),
+    GetPage(name: customerOrderView, page: () => CustomerOrderView()),
 
   ];
 }

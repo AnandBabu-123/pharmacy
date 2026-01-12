@@ -123,7 +123,7 @@ class PurchaseInvoiceScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: controller.customerNameController,
+                    controller: pharmacyController.invoiceNoCtrl,
                     decoration: const InputDecoration(
                       labelText: "InVoice No",
                       border: OutlineInputBorder(),
@@ -133,7 +133,7 @@ class PurchaseInvoiceScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
-                    controller: controller.customerPhoneController,
+                    controller: pharmacyController.supplierCodeCtrl,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       labelText: "Supplier Code",
@@ -148,7 +148,7 @@ class PurchaseInvoiceScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: controller.customerNameController,
+                    controller: pharmacyController.supplierNameCtrl,
                     decoration: const InputDecoration(
                       labelText: "Supplier Name",
                       border: OutlineInputBorder(),
@@ -158,13 +158,33 @@ class PurchaseInvoiceScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
-                    controller: controller.customerPhoneController,
-                    keyboardType: TextInputType.phone,
+                    controller: pharmacyController.purchaseDateCtrl,
+                    readOnly: true,
                     decoration: const InputDecoration(
-                      labelText: "Date",
+                      labelText: "PurChase Date",
                       border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
                     ),
-                  ),
+                    onTap: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: Get.context!,          // or context
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+
+                      if (pickedDate != null) {
+                        // format: yyyy-MM-dd (API friendly)
+                        String formattedDate =
+                            "${pickedDate.year.toString().padLeft(4, '0')}-"
+                            "${pickedDate.month.toString().padLeft(2, '0')}-"
+                            "${pickedDate.day.toString().padLeft(2, '0')}";
+
+                        pharmacyController.purchaseDateCtrl.text = formattedDate;
+                      }
+                    },
+                  )
+
                 ),
               ],
             ),
@@ -192,7 +212,6 @@ class PurchaseInvoiceScreen extends StatelessWidget {
               }),
             ),
 
-            /// ADD ITEM BUTTON
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
@@ -249,7 +268,7 @@ class PurchaseInvoiceScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          /// DELETE BUTTON (except first)
+          /// 🔹 HEADER + DELETE
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -270,8 +289,14 @@ class PurchaseInvoiceScreen extends StatelessWidget {
 
           const Divider(),
 
-          /// FORM FIELDS
+          /// 🔹 FORM FIELDS
           ...form.fields.entries.map((entry) {
+            final bool isAutoField =
+                entry.key == "After Discount" ||
+                    entry.key == "IGST %" ||
+                    entry.key == "SGST %" ||
+                    entry.key == "CGST %";
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
@@ -283,16 +308,63 @@ class PurchaseInvoiceScreen extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
+
+                  // Expanded(
+                  //   child: entry.key == "Item Name"
+                  //       ? _itemNameSearchField(pharmacyController, form, index)
+                  //       : Obx(() {
+                  //     final hasError = form.fieldErrors[entry.key]!.value;
+                  //
+                  //     return TextFormField(
+                  //       controller: entry.value,
+                  //       readOnly: isAutoField,
+                  //       decoration: InputDecoration(
+                  //         border: const OutlineInputBorder(),
+                  //         isDense: true,
+                  //         errorText: hasError ? "Required" : null,
+                  //         enabledBorder: OutlineInputBorder(
+                  //           borderSide: BorderSide(
+                  //             color: hasError ? Colors.red : Colors.grey,
+                  //           ),
+                  //         ),
+                  //         focusedBorder: OutlineInputBorder(
+                  //           borderSide: BorderSide(
+                  //             color: hasError ? Colors.red : Colors.blue,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     );
+                  //   }),
+                  // ),
+
                   Expanded(
                     child: entry.key == "Item Name"
                         ? _itemNameSearchField(pharmacyController, form, index)
-                        : TextFormField(
-                      controller: entry.value,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                    ),
+                        : entry.key == "Expiry Date"
+                        ? _expiryDateField(context, entry.value)
+                        : Obx(() {
+                      final hasError = form.fieldErrors[entry.key]!.value;
+
+                      return TextFormField(
+                        controller: entry.value,
+                        readOnly: isAutoField,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                          errorText: hasError ? "Required" : null,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: hasError ? Colors.red : Colors.grey,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: hasError ? Colors.red : Colors.blue,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                   ),
 
                 ],
@@ -302,27 +374,74 @@ class PurchaseInvoiceScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// 🔹 CANCEL & SAVE (PER CONTAINER)
+          /// 🔹 ACTION BUTTONS
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
                 onPressed: () {
-                  //   controller.clearItemForm(form);
+                  form.clear();
                 },
                 child: const Text("Cancel"),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () {
-                  //   controller.saveSingleItem(form, index);
+                onPressed: () async {
+                  // bool allValid = true;
+                  //
+                  // for (final item in pharmacyController.purChaseItemForms) {
+                  //   if (!item.validate()) {
+                  //     allValid = false;
+                  //   }
+                  // }
+                  //
+                  // if (!allValid) {
+                  //   Get.snackbar("Error", "Please fill all mandatory fields",
+                  //       backgroundColor: Colors.red.shade100);
+                  //   return;
+                  // }
+
+                  // ✅ if valid → call API
+                  await pharmacyController.addPurChaseInvoice();
                 },
                 child: const Text("Save"),
               ),
+
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _expiryDateField(
+      BuildContext context,
+      TextEditingController controller,
+      ) {
+    return TextFormField(
+      controller: controller,
+      readOnly: true, // 🔒 no manual entry
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        isDense: true,
+        suffixIcon: Icon(Icons.calendar_today),
+        hintText: "Select date",
+      ),
+      onTap: () async {
+        DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+
+        if (picked != null) {
+          controller.text =
+          "${picked.year.toString().padLeft(4, '0')}-"
+              "${picked.month.toString().padLeft(2, '0')}-"
+              "${picked.day.toString().padLeft(2, '0')}";
+        }
+      },
     );
   }
 
@@ -404,41 +523,6 @@ class PurchaseInvoiceScreen extends StatelessWidget {
     );
   }
 
-
-  /// 🔹 AUTOCOMPLETE FIELD (FIXED)
-  Widget _itemAutoComplete(
-      AddPharmacyController controller,
-      ManualStockItemForm form,
-      TextEditingController textController,
-      ) {
-    return Autocomplete<String>(
-      optionsBuilder: (value) {
-        if (value.text.isEmpty) return const Iterable.empty();
-        return pharmacyController.itemSearchLists.where(
-              (e) => e.toLowerCase().contains(value.text.toLowerCase()),
-        );
-      },
-      onSelected: (selection) {
-        textController.text = selection;
-
-        /// 🔹 AUTO-FILL ITEM DETAILS
-        controller.searchItemByName(selection);
-      },
-      fieldViewBuilder: (context, fieldController, focusNode, _) {
-        fieldController.text = textController.text;
-        return TextFormField(
-          controller: fieldController,
-          focusNode: focusNode,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            isDense: true,
-            hintText: "Search Item",
-          ),
-          onChanged: (v) => textController.text = v,
-        );
-      },
-    );
-  }
 
   /// 🔹 STORE DROPDOWN
   Widget _buildDropdownOnly({

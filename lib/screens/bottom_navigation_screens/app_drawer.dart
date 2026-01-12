@@ -311,6 +311,17 @@ class AppDrawer extends StatelessWidget {
                       Get.toNamed(AppRoutes.customerManagement);
                     },
                   ),
+
+                  ListTile(
+                    leading: const Icon(Icons.manage_accounts),
+                    title: const Text("Customer Order",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
+                    onTap: () {
+                      Get.toNamed(AppRoutes.customerOrderView);
+                    },
+                  ),
                 ],
               ),
             ],

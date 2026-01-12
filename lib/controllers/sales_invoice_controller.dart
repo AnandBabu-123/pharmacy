@@ -14,6 +14,7 @@ import '../data/api_calls.dart';
 import '../data/route_urls.dart';
 import '../data/shared_preferences_data.dart';
 import '../model/item_stock.dart';
+import '../model/search_customer_model.dart';
 import '../model/user_pharmacy_model.dart';
 import '../screens/pharmacyStore/editable_price_item.dart';
 
@@ -48,10 +49,16 @@ class SalesInVoiceController extends GetxController{
 
   late ManualStockItemForm defaultForm;
 
+  final RxList<OrderData> orderSearchResults = <OrderData>[].obs;
+  final RxBool isSearchingOrder = false.obs;
+
+
+
   @override
   void onInit() {
     super.onInit();
     defaultForm = ManualStockItemForm();
+    searchCustomerOrder("");
   }
 
   void addItem() {
@@ -82,6 +89,7 @@ class SalesInVoiceController extends GetxController{
     searchItem();
     addItem();
     addItems();
+
     searchItemByNames("", defaultForm);
   }
 
@@ -487,8 +495,6 @@ class SalesInVoiceController extends GetxController{
   }
 
 
-
-
   Future<void> getPharmacyDropDown() async {
     try {
       await apiCalls.initializeDio();
@@ -526,4 +532,44 @@ class SalesInVoiceController extends GetxController{
       print("$s");
     }
   }
+
+
+
+
+
+  Future<void> searchCustomerOrder(String orderId) async {
+    if (orderId.isEmpty) {
+      orderSearchResults.clear();
+      return;
+    }
+
+    try {
+      isSearchingOrder.value = true;
+
+      await apiCalls.initializeDio();
+      String userId = await prefs.getUserId();
+
+      final response = await apiCalls.getMethod(
+        "${RouteUrls.searchCustomerOrder}"
+            "orderId=$orderId&retailer=$userId",
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final model = SearchCustomerModel.fromJson(response.data);
+
+        if (model.status == true && model.data != null) {
+          orderSearchResults.assignAll(model.data!);
+        } else {
+          orderSearchResults.clear();
+        }
+      }
+    } catch (e) {
+      print("searchCustomerOrder error: $e");
+    } finally {
+      isSearchingOrder.value = false;
+    }
+  }
+
+
+
 }
