@@ -89,6 +89,8 @@ class LoginController extends GetxController{
     await preferences.saveEmail(data["userEmailAddress"] ?? "");
     await preferences.saveMobile(data["userContact"] ?? "");
 
+    await preferences.saveLoginTime(DateTime.now().millisecondsSinceEpoch);
+
     // Optional (if you need later)
     await preferences.saveUserType(data["userType"] ?? "");
     await preferences.saveDashboardRole(data["dashboardRole"] ?? "");

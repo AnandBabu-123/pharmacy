@@ -57,6 +57,10 @@ class SharedPreferencesData {
     final pref = await SharedPreferences.getInstance();
     await pref.setString(userId, usersId);
   }
+  Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
 
   Future<String> getUserId() async {
     final pref = await SharedPreferences.getInstance();
@@ -77,6 +81,16 @@ class SharedPreferencesData {
     final pref = await SharedPreferences.getInstance();
     await pref.setBool(loginStatus, logInStatus);
   }
+  Future<void> saveLoginTime(int time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt("login_time", time);
+  }
+
+  Future<int?> getLoginTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt("login_time");
+  }
+
 
   Future<bool> getLoginStatus() async {
     final pref = await SharedPreferences.getInstance();

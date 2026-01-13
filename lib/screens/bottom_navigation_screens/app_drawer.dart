@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:propertysearch/routes/app_routes.dart';
 
+import '../../controllers/authController.dart';
 import '../../controllers/drawerControllerX.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -328,78 +329,6 @@ class AppDrawer extends StatelessWidget {
           ),
 
 
-
-          /// PURCHASE INVOICE
-          // ExpansionTile(
-          //   leading: const Icon(Icons.receipt),
-          //   title: const Text(
-          //     "Purchase Invoice",
-          //     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          //   ),
-          //   children: [
-          //     ListTile(
-          //       leading: const Icon(Icons.file_copy),
-          //       title: const Text("PurChase Invoice"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.getInvoice);
-          //       },
-          //     ),
-          //     ListTile(
-          //       leading: const Icon(Icons.file_copy),
-          //       title: const Text("PurChase Report"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.getPurchaseReport);
-          //       },
-          //     ),
-          //
-          //     ListTile(
-          //       leading: const Icon(Icons.file_copy),
-          //       title: const Text("Sales InVoice"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.salesInVoice);
-          //       },
-          //     ),
-          //
-          //     ListTile(
-          //       leading: const Icon(Icons.file_copy),
-          //       title: const Text("Price Manage"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.priceManage);
-          //       },
-          //     ),
-          //
-          //     ListTile(
-          //       leading: const Icon(Icons.list),
-          //       title: const Text("Stock Report"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.stockReport);
-          //       },
-          //     ),
-          //     ListTile(
-          //       leading: const Icon(Icons.storage),
-          //       title: const Text("Manual Stock"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.manualStock);
-          //       },
-          //     ),
-          //     ListTile(
-          //       leading: const Icon(Icons.storage),
-          //       title: const Text("GST Report"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.gstReport);
-          //       },
-          //     ),
-          //
-          //     ListTile(
-          //       leading: const Icon(Icons.storage),
-          //       title: const Text("Customer Management"),
-          //       onTap: () {
-          //         Get.toNamed(AppRoutes.customerManagement);
-          //       },
-          //     ),
-          //   ],
-          // ),
-
           const Divider(),
 
           ListTile(
@@ -411,7 +340,9 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text("Logout"),
-            onTap: () {
+            onTap: () async {
+              final auth = Get.find<AuthController>();
+              await auth.logout();
               Get.offAllNamed(AppRoutes.loginView);
             },
           ),
