@@ -122,22 +122,41 @@ class PurchaseInvoiceScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: pharmacyController.invoiceNoCtrl,
-                    decoration: const InputDecoration(
-                      labelText: "InVoice No",
-                      border: OutlineInputBorder(),
+                  child: SizedBox(
+                    height: 52, // 👈 reduce height (try 36–44)
+                    child: TextField(
+                      controller: pharmacyController.invoiceNoCtrl,
+                      style: const TextStyle(fontSize: 13), // 👈 smaller text
+                      decoration: const InputDecoration(
+                        labelText: "Invoice No",
+                        isDense: true, // 👈 very important
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 8),
                 Expanded(
-                  child: TextField(
-                    controller: pharmacyController.supplierCodeCtrl,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: "Supplier Code",
-                      border: OutlineInputBorder(),
+                  child: SizedBox(
+                    height: 52, // 👈 reduce height (try 36–44)
+                    child: TextField(
+                      controller: pharmacyController.supplierCodeCtrl,
+                      style: const TextStyle(fontSize: 13), // 👈 smaller text
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: "Supplier Code",
+                        isDense: true, // 👈 very important
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
                 ),
@@ -147,42 +166,60 @@ class PurchaseInvoiceScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: pharmacyController.supplierNameCtrl,
-                    decoration: const InputDecoration(
-                      labelText: "Supplier Name",
-                      border: OutlineInputBorder(),
+                  child: SizedBox(
+                    height: 52, // 👈 reduce height (try 36–44)
+                    child: TextField(
+                      controller: pharmacyController.supplierNameCtrl,
+                      style: const TextStyle(fontSize: 13), // 👈 smaller text
+                      decoration: const InputDecoration(
+                        labelText: "Supplier Name",
+                        isDense: true, // 👈 very important
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: TextField(
-                    controller: pharmacyController.purchaseDateCtrl,
-                    readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: "PurChase Date",
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.calendar_today),
+                  child: SizedBox(
+                    height: 52,
+                    child: TextField(
+                      controller: pharmacyController.purchaseDateCtrl,
+                      style: const TextStyle(fontSize: 13), // 👈 smaller text
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: "PurChase Date",
+                        isDense: true, // 👈 very important
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(),
+
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: Get.context!,          // or context
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (pickedDate != null) {
+                          // format: yyyy-MM-dd (API friendly)
+                          String formattedDate =
+                              "${pickedDate.year.toString().padLeft(4, '0')}-"
+                              "${pickedDate.month.toString().padLeft(2, '0')}-"
+                              "${pickedDate.day.toString().padLeft(2, '0')}";
+
+                          pharmacyController.purchaseDateCtrl.text = formattedDate;
+                        }
+                      },
                     ),
-                    onTap: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: Get.context!,          // or context
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-
-                      if (pickedDate != null) {
-                        // format: yyyy-MM-dd (API friendly)
-                        String formattedDate =
-                            "${pickedDate.year.toString().padLeft(4, '0')}-"
-                            "${pickedDate.month.toString().padLeft(2, '0')}-"
-                            "${pickedDate.day.toString().padLeft(2, '0')}";
-
-                        pharmacyController.purchaseDateCtrl.text = formattedDate;
-                      }
-                    },
                   )
 
                 ),

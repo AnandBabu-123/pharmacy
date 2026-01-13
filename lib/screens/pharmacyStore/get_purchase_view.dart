@@ -215,17 +215,35 @@ class PurchaseReport extends StatelessWidget {
         required String label,
         required TextEditingController controller,
       }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
+
+      // 🔒 DISABLE MANUAL TYPING
       readOnly: true,
+
       decoration: InputDecoration(
         labelText: label,
-        suffixIcon: IconButton(
-          icon: const Icon(Icons.calendar_today),
-          onPressed: () => _selectDate(context, controller),
+
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
-        border: const OutlineInputBorder(),
       ),
+
+      onTap: () async {
+        FocusScope.of(context).unfocus(); // hide keyboard
+
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+
+        if (pickedDate != null) {
+          controller.text =
+          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+        }
+      },
     );
   }
 
