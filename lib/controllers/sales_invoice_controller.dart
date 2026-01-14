@@ -8,6 +8,7 @@ import 'package:propertysearch/controllers/manual_stock_item_form.dart';
 import 'package:propertysearch/controllers/sales_item_form.dart';
 import 'package:propertysearch/model/gst_report_model.dart';
 import 'package:propertysearch/model/manual_stock_model.dart';
+import 'package:propertysearch/model/order_response.dart';
 import 'package:propertysearch/model/price_manage_model.dart';
 
 import '../data/api_calls.dart';
@@ -45,14 +46,16 @@ class SalesInVoiceController extends GetxController{
 
   var manualItemForms = <ManualStockItemForm>[].obs;
   final RxList<String> itemSearchLists = <String>[].obs;
-
+  final Rxn<OrderResponse> orderResponse = Rxn<OrderResponse>();
 
   late ManualStockItemForm defaultForm;
 
   final RxList<OrderData> orderSearchResults = <OrderData>[].obs;
   final RxBool isSearchingOrder = false.obs;
 
+  RxString selectedOrderId = "".obs;
 
+  RxBool isFilterExpanded = true.obs;
 
   @override
   void onInit() {
@@ -533,10 +536,6 @@ class SalesInVoiceController extends GetxController{
     }
   }
 
-
-
-
-
   Future<void> searchCustomerOrder(String orderId) async {
     if (orderId.isEmpty) {
       orderSearchResults.clear();
@@ -569,6 +568,117 @@ class SalesInVoiceController extends GetxController{
       isSearchingOrder.value = false;
     }
   }
+
+  /// observable
+
+
+  Future<void> findRetailerid({
+    required String orderId,
+    required String customerNo,
+    required String email,
+    required String status,
+    required String location,
+    required String fromDate,
+    required String toDate,
+  }) async {
+    orderResponse.value = null;
+    try {
+      isLoading.value = true;
+
+      final String accessToken = await prefs.getAccessToken();
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: "http://3.111.125.81/",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      final selectedStore = this.selectedStore.value;
+
+      if (selectedStore == null) {
+        Get.snackbar("Error", "Please select store");
+        return;
+      }
+
+      /// 🔹 REQUIRED STORE ID
+      if (selectedStore.userIdStoreId == null ||
+          selectedStore.userIdStoreId!.isEmpty) {
+        Get.snackbar("Error", "Store mapping not found");
+        return;
+      }
+
+      /// 🔹 PARAM MAPPING
+      final String retailerIdParam = selectedStore.userIdStoreId!;
+      final String orderIdParam = orderId;
+
+      final Map<String, String> queryParams = {
+        "orderId": orderIdParam,
+        "retailerId": retailerIdParam,
+        "location": location,
+        "fromDate": fromDate,
+        "toDate": toDate,
+        "orderStatus": status,
+        "customerNumber": customerNo,
+        "customerEmail": email,
+      };
+
+      /// 🔹 REMOVE EMPTY VALUES
+      queryParams.removeWhere((k, v) => v.isEmpty);
+
+      debugPrint("➡ API PARAMS: $queryParams");
+
+      final response = await dio.get(
+        "/order/details",
+        queryParameters: queryParams,
+      );
+
+      debugPrint("➡ STATUS CODE: ${response.statusCode}");
+      debugPrint("➡ RESPONSE: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        /// 🔥 API RETURNS LIST
+        if (data is List && data.isNotEmpty) {
+          orderResponse.value = OrderResponse.fromJson(data[0]);
+
+          debugPrint(
+              "✅ Order ID: ${orderResponse.value?.orderHdr?.orderId}");
+          debugPrint(
+              "✅ Customer ID: ${orderResponse.value?.orderHdr?.customerId}");
+          debugPrint(
+              "✅ Retailer ID: ${orderResponse.value?.orderHdr?.retailerId}");
+          debugPrint(
+              "✅ Order Status: ${orderResponse.value?.orderHdr?.orderStatus}");
+
+          Get.snackbar("Success", "Order details fetched successfully");
+        } else {
+          Get.snackbar("Error", "There is no data ");
+        }
+      } else {
+        Get.snackbar("Error", "Server error: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      debugPrint("❌ DIO ERROR: ${e.message}");
+      debugPrint("❌ RESPONSE: ${e.response?.data}");
+      Get.snackbar("Error", "Network error occurred");
+    } catch (e, s) {
+      debugPrint("❌ UNEXPECTED ERROR: $e");
+      debugPrint("❌ STACKTRACE: $s");
+      Get.snackbar("Error", "Something went wrong");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
+
 
 
 
