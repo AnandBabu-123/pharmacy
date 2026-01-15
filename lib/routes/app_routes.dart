@@ -9,7 +9,7 @@ import 'package:propertysearch/screens/pharmacyStore/add_pharmacy.dart';
 import 'package:propertysearch/screens/pharmacyStore/add_rack_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/customer_order.dart';
 import 'package:propertysearch/screens/pharmacyStore/custore_management.dart';
-import 'package:propertysearch/screens/pharmacyStore/get_purchase_view.dart';
+import 'package:propertysearch/screens/pharmacyStore/get_purchase_report.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_rock_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_sales_report.dart';
 import 'package:propertysearch/screens/pharmacyStore/gst_report_view.dart';

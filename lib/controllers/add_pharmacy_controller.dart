@@ -17,6 +17,7 @@ import '../model/get_rack_mangement.dart';
 import '../model/item_searched_model.dart';
 import '../model/pharmacy_storemodel.dart';
 import '../model/purchase_item_model.dart';
+import '../model/report_invoice_data.dart';
 import '../model/user_pharmacy_model.dart';
 
 import 'dart:io';
@@ -62,6 +63,9 @@ class AddPharmacyController extends GetxController {
 
   RxList<ItemSearchModel> searchedItems =
       <ItemSearchModel>[].obs;
+
+  var expandedIndex = (-1).obs;   // which item is expanded
+  var invoiceDetails = Rxn<ReportInvoiceData>(); // response model
 
   final Dio dio = Dio();
 
@@ -897,8 +901,6 @@ class AddPharmacyController extends GetxController {
   }
 
 
-
-
   /// 🔹 CALL API WITH SELECTED STORE
   Future<void> getPurChaseReport(String userIdStoreId) async {
     try {
@@ -927,7 +929,28 @@ class AddPharmacyController extends GetxController {
   }
 
 
+  Future<void> getInVoiceData(String invoiceNo) async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
 
+      final response = await apiCalls.getMethod(
+        "${RouteUrls.fetchInvoiceData}?invoiceNo=$invoiceNo",
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final json = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        invoiceDetails.value = ReportInvoiceData.fromJson(json);
+      }
+    } catch (e) {
+      debugPrint("❌ Purchase Report Error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 
 }
