@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:propertysearch/controllers/manual_stock_item_form.dart';
 import 'package:propertysearch/controllers/sales_item_form.dart';
@@ -432,7 +433,7 @@ class SalesInVoiceController extends GetxController{
         form.mrp.text = item.mRP?.toString() ?? "";
         form.gst.text = item.gst?.toString() ?? "";
         form.hsn.text = item.hsnGroup ?? "";
-        form.purchaseRate.text = item.purRate?.toString() ?? "";
+        form.TotalPurchasePrice.text = item.purRate?.toString() ?? "";
 
         if (item.expiryDate != null) {
           form.expiryDate.text =
@@ -677,7 +678,169 @@ class SalesInVoiceController extends GetxController{
   }
 
 
+  Future<void> addSalesInvoice() async {
+    try {
+      final accessToken = await prefs.getAccessToken();
 
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: "http://3.111.125.81/",
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      final body = {
+        "storeId": selectedStore.value?.id,
+
+        // 🔹 HEADER
+        "custCode": int.tryParse(customerPhoneController.text) ?? 0,
+        "custName": customerNameController.text,
+
+        // 🔹 ITEMS
+        "detailRequests": List.generate(itemForms.length, (index) {
+          final f = itemForms[index];
+
+          return {
+            "catName": "BRAND",                       // static / if API needs
+            "itemSubCategory": "TAB",                // static / from dropdown
+
+            "itemCode": f.itemCode.text,
+            "itemName": f.itemName.text,
+            "mfacName": f.manufacturer.text,
+            "brandName": f.brand.text,
+            "batchNo": f.batch.text,
+            "expiryDate": f.expiryDate.text,
+
+            "mrp": double.tryParse(f.mrp.text) ?? 0,
+            "discPerct": double.tryParse(f.discount.text) ?? 0,
+            "afterDiscount":
+            double.tryParse(f.afterDiscount.text) ?? 0,
+
+            "igstper": double.tryParse(f.IGST.text) ?? 12,
+            "sgstper": double.tryParse(f.SGST.text) ?? 6,
+            "cgstper": double.tryParse(f.CGST.text) ?? 6,
+
+            "igstamt":
+            double.tryParse(f.IGSTAmount.text) ?? 0,
+            "sgstamt":
+            double.tryParse(f.SGSTAmount.text) ?? 0,
+            "cgstamt":
+            double.tryParse(f.CGSTAmount.text) ?? 0,
+
+            "total":
+            double.tryParse(f.FinalSalePrice.text) ?? 0,
+
+            "totalPurchasePrice":
+            double.tryParse(f.TotalPurchasePrice.text) ?? 0,
+
+            "profitOrLoss":
+            double.tryParse(f.ProfitOrLoss.text) ?? 0,
+
+            "qtyBox":
+            int.tryParse(f.BoxQuantity.text) ?? 0,
+          };
+        }),
+      };
+
+      debugPrint("📤 REQUEST BODY: $body");
+
+      final response = await dio.post(
+        "sale/add",
+        data: body,
+      );
+
+      debugPrint("📥 Upload Response: ${response.data}");
+
+      Get.snackbar(
+        "Success",
+        "Sales Invoice Added",
+        backgroundColor: Colors.green.shade100,
+      );
+    } catch (e, s) {
+      debugPrint("❌ API ERROR: $e");
+      debugPrint("$s");
+
+      Get.snackbar(
+        "Error",
+        "Failed to save invoice",
+        backgroundColor: Colors.red.shade100,
+      );
+    }
+  }
+
+
+  Future<void> addManualInvoice() async {
+    try {
+      final accessToken = await prefs.getAccessToken();
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: "http://3.111.125.81/",
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      // 🔹 Prepare request body
+      final body = {
+        "storeId": selectedStore.value?.id ?? "",
+        "items":manualItemForms.map((f) {
+          return {
+            "manufacturer": f.manufacturer.text,
+            "mfName": f.manufacturerName.text,
+            "itemCode": f.itemCode.text,
+            "itemName": f.itemName.text,
+            "supplierName": f.supplier.text,
+            "rack": f.rack.text,
+            "batch": f.batch.text,
+            "expiryDate": f.expiryDate.text,
+            "balQuantity": int.tryParse(f.balQty.text) ?? 0,
+            "balPackQuantity": int.tryParse(f.balPackQty.text) ?? 0,
+            "balLooseQuantity": int.tryParse(f.balLoose.text) ?? 0,
+            "total": f.qtyTotal.text,
+            "mrpPack": double.tryParse(f.mrpPack.text) ?? 0,
+            "purRatePerPackAfterGST": double.tryParse(f.purRate.text) ?? 0,
+            "mrpValue": double.tryParse(f.mrpValue.text) ?? 0,
+            "itemCategory": f.category.text,
+            "onlineYesNo": f.online.text.isNotEmpty ? f.online.text : "No",
+            "stockValueMrp": double.tryParse(f.stockValueMRP.text) ?? 0,
+            "stockValuePurrate": double.tryParse(f.stockValuePurRate.text) ?? 0,
+          };
+        }).toList(),
+      };
+
+      debugPrint("📤 REQUEST BODY: $body");
+
+      final response = await dio.post(
+        "stock/add-stock-manually",
+        data: body,
+      );
+
+      debugPrint("📥 Upload Response: ${response.data}");
+
+      Get.snackbar(
+        "Success",
+        "Manual Stock Added",
+        backgroundColor: Colors.green.shade100,
+      );
+    } catch (e, s) {
+      debugPrint("❌ API ERROR: $e");
+      debugPrint("$s");
+
+      Get.snackbar(
+        "Error",
+        "Failed to save invoice",
+        backgroundColor: Colors.red.shade100,
+      );
+    }
+  }
 
 
 

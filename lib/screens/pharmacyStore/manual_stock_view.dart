@@ -114,6 +114,23 @@ class ManualStockView extends StatelessWidget {
             const SizedBox(height: 16),
 
             /// ITEMS LIST
+            // Expanded(
+            //   child: Obx(() {
+            //     return ListView.builder(
+            //       itemCount: controller.manualItemForms.length,
+            //       itemBuilder: (context, index) {
+            //         return _itemContainer(
+            //           context,
+            //           controller,
+            //           controller.manualItemForms[index],
+            //           index,
+            //         );
+            //       },
+            //     );
+            //   }),
+            // ),
+
+
             Expanded(
               child: Obx(() {
                 return ListView.builder(
@@ -167,7 +184,6 @@ class ManualStockView extends StatelessWidget {
     );
   }
 
-  /// 🔹 ITEM CARD
   Widget _itemContainer(
       BuildContext context,
       SalesInVoiceController controller,
@@ -175,6 +191,7 @@ class ManualStockView extends StatelessWidget {
       int index,
       ) {
     return Container(
+      key: ValueKey("manual_item_$index"),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -186,7 +203,7 @@ class ManualStockView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          /// DELETE BUTTON (except first)
+          /// HEADER
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -223,6 +240,53 @@ class ManualStockView extends StatelessWidget {
                   Expanded(
                     child: entry.key == "Item Name"
                         ? _itemAutoCompletes(controller, form, entry.value)
+                        : entry.key == "Online"
+                        ? DropdownButtonFormField<String>(
+                      value: entry.value.text.isNotEmpty
+                          ? entry.value.text
+                          : null,
+                      items: const [
+                        DropdownMenuItem(
+                          value: "Yes",
+                          child: Text("Yes"),
+                        ),
+                        DropdownMenuItem(
+                          value: "No",
+                          child: Text("No"),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        entry.value.text = value ?? "";
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                    )
+                        : entry.key == "Expiry Date"
+                        ? TextFormField(
+                      controller: entry.value,
+                      readOnly: true, // prevent manual typing
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        hintText: "Select Expiry Date",
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (pickedDate != null) {
+                          entry.value.text =
+                              pickedDate.toIso8601String().split('T').first;
+                        }
+                      },
+                    )
                         : TextFormField(
                       controller: entry.value,
                       decoration: const InputDecoration(
@@ -236,22 +300,36 @@ class ManualStockView extends StatelessWidget {
             );
           }).toList(),
 
+
           const SizedBox(height: 12),
 
-          /// 🔹 CANCEL & SAVE (PER CONTAINER)
+          /// BUTTONS
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {
-                  //   controller.clearItemForm(form);
-                },
+                onPressed: () {},
                 child: const Text("Cancel"),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () {
-                  //   controller.saveSingleItem(form, index);
+                onPressed: () async {
+                  // bool allValid = true;
+                  //
+                  // for (final item in pharmacyController.purChaseItemForms) {
+                  //   if (!item.validate()) {
+                  //     allValid = false;
+                  //   }
+                  // }
+                  //
+                  // if (!allValid) {
+                  //   Get.snackbar("Error", "Please fill all mandatory fields",
+                  //       backgroundColor: Colors.red.shade100);
+                  //   return;
+                  // }
+
+                  // ✅ if valid → call API
+                  await controller.addManualInvoice();
                 },
                 child: const Text("Save"),
               ),
@@ -262,29 +340,30 @@ class ManualStockView extends StatelessWidget {
     );
   }
 
-  /// 🔹 AUTOCOMPLETE FIELD (FIXED)
   Widget _itemAutoCompletes(
       SalesInVoiceController controller,
       ManualStockItemForm form,
       TextEditingController textController,
       ) {
     return Autocomplete<String>(
-      optionsBuilder: (value) {
-        if (value.text.isEmpty) return const Iterable.empty();
+      optionsBuilder: (TextEditingValue value) {
+        if (value.text.isEmpty) {
+          return const Iterable<String>.empty();
+        }
+
         return controller.itemSearchLists.where(
               (e) => e.toLowerCase().contains(value.text.toLowerCase()),
         );
       },
 
-      /// 🔹 when user selects from dropdown
-      onSelected: (selection) {
+      /// ✅ when user selects
+      onSelected: (String selection) {
+        debugPrint("✅ Selected: $selection");
         textController.text = selection;
         controller.searchItemByNames(selection, form);
       },
 
       fieldViewBuilder: (context, fieldController, focusNode, _) {
-        fieldController.text = textController.text;
-
         return TextFormField(
           controller: fieldController,
           focusNode: focusNode,
@@ -294,15 +373,157 @@ class ManualStockView extends StatelessWidget {
             hintText: "Search Item",
           ),
 
-          /// 🔹 call API while typing
-          onChanged: (v) {
-            textController.text = v;
-            controller.searchItemByNames(v, form);
+          /// ✅ API CALL while typing
+          onChanged: (value) {
+            debugPrint("⌨ Typing: $value");
+            textController.text = value;
+
+            if (value.trim().length >= 2) {
+              controller.searchItemByNames(value, form);
+            }
           },
         );
       },
     );
   }
+
+
+  /// 🔹 ITEM CARD
+  // Widget _itemContainer(
+  //     BuildContext context,
+  //     SalesInVoiceController controller,
+  //     ManualStockItemForm form,
+  //     int index,
+  //     ) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 16),
+  //     padding: const EdgeInsets.all(12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(10),
+  //       boxShadow: [
+  //         BoxShadow(color: Colors.grey.shade300, blurRadius: 4),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         /// DELETE BUTTON (except first)
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text(
+  //               "Item ${index + 1}",
+  //               style: const TextStyle(
+  //                 fontWeight: FontWeight.bold,
+  //                 fontSize: 14,
+  //               ),
+  //             ),
+  //             if (index != 0)
+  //               IconButton(
+  //                 icon: const Icon(Icons.delete, color: Colors.red),
+  //                 onPressed: () => controller.removeItems(index),
+  //               ),
+  //           ],
+  //         ),
+  //
+  //         const Divider(),
+  //
+  //         /// FORM FIELDS
+  //         ...form.fields.entries.map((entry) {
+  //           return Padding(
+  //             padding: const EdgeInsets.symmetric(vertical: 6),
+  //             child: Row(
+  //               children: [
+  //                 SizedBox(
+  //                   width: 160,
+  //                   child: Text(
+  //                     entry.key,
+  //                     style: const TextStyle(fontWeight: FontWeight.w600),
+  //                   ),
+  //                 ),
+  //                 Expanded(
+  //                   child: entry.key == "Item Name"
+  //                       ? _itemAutoCompletes(controller, form, entry.value)
+  //                       : TextFormField(
+  //                     controller: entry.value,
+  //                     decoration: const InputDecoration(
+  //                       border: OutlineInputBorder(),
+  //                       isDense: true,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         }).toList(),
+  //
+  //         const SizedBox(height: 12),
+  //
+  //         /// 🔹 CANCEL & SAVE (PER CONTAINER)
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.end,
+  //           children: [
+  //             TextButton(
+  //               onPressed: () {
+  //                 //   controller.clearItemForm(form);
+  //               },
+  //               child: const Text("Cancel"),
+  //             ),
+  //             const SizedBox(width: 8),
+  //             ElevatedButton(
+  //               onPressed: () {
+  //                 //   controller.saveSingleItem(form, index);
+  //               },
+  //               child: const Text("Save"),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  //
+  // /// 🔹 AUTOCOMPLETE FIELD (FIXED)
+  // Widget _itemAutoCompletes(
+  //     SalesInVoiceController controller,
+  //     ManualStockItemForm form,
+  //     TextEditingController textController,
+  //     ) {
+  //   return Autocomplete<String>(
+  //     optionsBuilder: (value) {
+  //       if (value.text.isEmpty) return const Iterable.empty();
+  //       return controller.itemSearchLists.where(
+  //             (e) => e.toLowerCase().contains(value.text.toLowerCase()),
+  //       );
+  //     },
+  //
+  //     /// 🔹 when user selects from dropdown
+  //     onSelected: (selection) {
+  //       textController.text = selection;
+  //       controller.searchItemByNames(selection, form);
+  //     },
+  //
+  //     fieldViewBuilder: (context, fieldController, focusNode, _) {
+  //       fieldController.text = textController.text;
+  //
+  //       return TextFormField(
+  //         controller: fieldController,
+  //         focusNode: focusNode,
+  //         decoration: const InputDecoration(
+  //           border: OutlineInputBorder(),
+  //           isDense: true,
+  //           hintText: "Search Item",
+  //         ),
+  //
+  //         /// 🔹 call API while typing
+  //         onChanged: (v) {
+  //           textController.text = v;
+  //           controller.searchItemByNames(v, form);
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
 
 

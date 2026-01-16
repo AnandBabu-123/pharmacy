@@ -198,13 +198,27 @@ class SalesInvoiceView extends StatelessWidget {
   }
 
 
-  /// 🔹 ITEM CARD
   Widget _itemContainer(
       BuildContext context,
       SalesInVoiceController controller,
       SalesItemForm form,
       int index,
       ) {
+    bool isReadOnly(String key) {
+      return [
+        "After Discount",
+        "IGST %",
+        "SGST %",
+        "CGST %",
+        "IGST Amount",
+        "SGST Amount",
+        "CGST Amount",
+        "Final Sale Price",
+        "Total Purchase Price",
+        "Profit Or Loss",
+      ].contains(key);
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -217,7 +231,7 @@ class SalesInvoiceView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          /// DELETE BUTTON (except first)
+          /// HEADER
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -256,44 +270,191 @@ class SalesInvoiceView extends StatelessWidget {
                         ? _itemAutoComplete(controller, form, entry.value)
                         : TextFormField(
                       controller: entry.value,
+                      readOnly: isReadOnly(entry.key),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         isDense: true,
                       ),
+                      onChanged: (_) {
+                        // 🔥 recalc when user edits
+                        form.calculateAll();
+                      },
                     ),
                   ),
                 ],
               ),
             );
           }).toList(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                       //   controller.clearItemForm(form);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          // bool allValid = true;
+                          //
+                          // for (final item in pharmacyController.purChaseItemForms) {
+                          //   if (!item.validate()) {
+                          //     allValid = false;
+                          //   }
+                          // }
+                          //
+                          // if (!allValid) {
+                          //   Get.snackbar("Error", "Please fill all mandatory fields",
+                          //       backgroundColor: Colors.red.shade100);
+                          //   return;
+                          // }
 
-          const SizedBox(height: 12),
-
-          /// 🔹 CANCEL & SAVE (PER CONTAINER)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-               //   controller.clearItemForm(form);
-                },
-                child: const Text("Cancel"),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-               //   controller.saveSingleItem(form, index);
-                },
-                child: const Text("Save"),
-              ),
-            ],
-          ),
+                          // ✅ if valid → call API
+                          await controller.addSalesInvoice();
+                        },
+                        child: const Text("Save"),
+                      ),
+                    ],
+                  ),
         ],
       ),
     );
   }
 
+
+  // /// 🔹 ITEM CARD
+  // Widget _itemContainer(
+  //     BuildContext context,
+  //     SalesInVoiceController controller,
+  //     SalesItemForm form,
+  //     int index,
+  //     ) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 16),
+  //     padding: const EdgeInsets.all(12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(10),
+  //       boxShadow: [
+  //         BoxShadow(color: Colors.grey.shade300, blurRadius: 4),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         /// DELETE BUTTON (except first)
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text(
+  //               "Item ${index + 1}",
+  //               style: const TextStyle(
+  //                 fontWeight: FontWeight.bold,
+  //                 fontSize: 14,
+  //               ),
+  //             ),
+  //             if (index != 0)
+  //               IconButton(
+  //                 icon: const Icon(Icons.delete, color: Colors.red),
+  //                 onPressed: () => controller.removeItem(index),
+  //               ),
+  //           ],
+  //         ),
+  //
+  //         const Divider(),
+  //
+  //         /// FORM FIELDS
+  //         ...form.fields.entries.map((entry) {
+  //           return Padding(
+  //             padding: const EdgeInsets.symmetric(vertical: 6),
+  //             child: Row(
+  //               children: [
+  //                 SizedBox(
+  //                   width: 160,
+  //                   child: Text(
+  //                     entry.key,
+  //                     style: const TextStyle(fontWeight: FontWeight.w600),
+  //                   ),
+  //                 ),
+  //                 Expanded(
+  //                   child: entry.key == "Item Name"
+  //                       ? _itemAutoComplete(controller, form, entry.value)
+  //                       : TextFormField(
+  //                     controller: entry.value,
+  //                     decoration: const InputDecoration(
+  //                       border: OutlineInputBorder(),
+  //                       isDense: true,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         }).toList(),
+  //
+  //         const SizedBox(height: 12),
+  //
+  //         /// 🔹 CANCEL & SAVE (PER CONTAINER)
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.end,
+  //           children: [
+  //             TextButton(
+  //               onPressed: () {
+  //              //   controller.clearItemForm(form);
+  //               },
+  //               child: const Text("Cancel"),
+  //             ),
+  //             const SizedBox(width: 8),
+  //             ElevatedButton(
+  //               onPressed: () {
+  //              //   controller.saveSingleItem(form, index);
+  //               },
+  //               child: const Text("Save"),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   /// 🔹 AUTOCOMPLETE FIELD (FIXED)
+  // Widget _itemAutoComplete(
+  //     SalesInVoiceController controller,
+  //     SalesItemForm form,
+  //     TextEditingController textController,
+  //     ) {
+  //   return Autocomplete<String>(
+  //     optionsBuilder: (value) {
+  //       if (value.text.isEmpty) return const Iterable.empty();
+  //       return controller.itemSearchList.where(
+  //             (e) => e.toLowerCase().contains(value.text.toLowerCase()),
+  //       );
+  //     },
+  //     onSelected: (selection) {
+  //       textController.text = selection;
+  //
+  //       /// 🔹 AUTO-FILL ITEM DETAILS
+  //       controller.searchItemByName(selection, form);
+  //     },
+  //     fieldViewBuilder: (context, fieldController, focusNode, _) {
+  //       fieldController.text = textController.text;
+  //       return TextFormField(
+  //         controller: fieldController,
+  //         focusNode: focusNode,
+  //         decoration: const InputDecoration(
+  //           border: OutlineInputBorder(),
+  //           isDense: true,
+  //           hintText: "Search Item",
+  //         ),
+  //         onChanged: (v) => textController.text = v,
+  //       );
+  //     },
+  //   );
+  // }
+
+
   Widget _itemAutoComplete(
       SalesInVoiceController controller,
       SalesItemForm form,
@@ -301,7 +462,7 @@ class SalesInvoiceView extends StatelessWidget {
       ) {
     return Autocomplete<String>(
       optionsBuilder: (value) {
-        if (value.text.isEmpty) return const Iterable.empty();
+        if (value.text.isEmpty) return const Iterable<String>.empty();
         return controller.itemSearchList.where(
               (e) => e.toLowerCase().contains(value.text.toLowerCase()),
         );
@@ -314,6 +475,7 @@ class SalesInvoiceView extends StatelessWidget {
       },
       fieldViewBuilder: (context, fieldController, focusNode, _) {
         fieldController.text = textController.text;
+
         return TextFormField(
           controller: fieldController,
           focusNode: focusNode,
