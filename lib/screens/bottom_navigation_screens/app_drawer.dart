@@ -220,6 +220,16 @@ class AppDrawer extends StatelessWidget {
                       Get.toNamed(AppRoutes.salesInVoice);
                     },
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.request_quote),
+                    title: const Text("Sales Report",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
+                    onTap: () {
+                      Get.toNamed(AppRoutes.salesInvoiceReport);
+                    },
+                  ),
                 ],
               ),
 

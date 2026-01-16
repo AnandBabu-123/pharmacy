@@ -9,6 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:propertysearch/controllers/purchase_invoice_items.dart';
+import 'package:propertysearch/model/sales_document_model.dart';
+import 'package:propertysearch/model/sales_report_model.dart';
 import '../data/api_calls.dart';
 import '../data/route_urls.dart';
 import '../data/shared_preferences_data.dart';
@@ -66,6 +68,7 @@ class AddPharmacyController extends GetxController {
 
   var expandedIndex = (-1).obs;   // which item is expanded
   var invoiceDetails = Rxn<ReportInvoiceData>(); // response model
+  var salesReportDetails = Rxn<SalesDocumentModel>();
 
   final Dio dio = Dio();
 
@@ -88,6 +91,7 @@ class AddPharmacyController extends GetxController {
   var itemIndexes = <int>[].obs;
 
   var purchaseList = <PurchaseItem>[].obs;
+  var inVoiceList = <Invoice>[].obs;
 
 
   var itemSearchLists = <String>[].obs;
@@ -909,6 +913,7 @@ class AddPharmacyController extends GetxController {
 
       final response = await apiCalls.getMethod(
         "${RouteUrls.purchaseReport}?userIdstoreId=$userIdStoreId",
+
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -927,7 +932,6 @@ class AddPharmacyController extends GetxController {
       isLoading.value = false;
     }
   }
-
 
   Future<void> getInVoiceData(String invoiceNo) async {
     try {
@@ -951,6 +955,79 @@ class AddPharmacyController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> getSalesReport(String userIdStoreId) async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      final response = await apiCalls.getMethod(
+        "${RouteUrls.salesReport}?userIdstoreId=$userIdStoreId",
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final jsonData = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        debugPrint("🧾 JSON Keys: ${jsonData.keys}");
+
+        final List list = jsonData['invoices'] ?? [];
+
+        inVoiceList.value =
+            list.map((e) => Invoice.fromJson(e)).toList();
+
+        debugPrint("✅ Total invoices loaded: ${inVoiceList.length}");
+      } else {
+        debugPrint("❌ API failed with status: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      debugPrint("❌ Sales Report Error: $e");
+      debugPrint("📌 StackTrace: $st");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
+  Future<void> getSalesData(String documentNo) async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
+
+      final url = "${RouteUrls.fetchSalesReport}?docNumber=$documentNo";
+      debugPrint("➡️ API URL: $url");
+      http://3.111.125.81/sale/report/get-sale-invoice-details?docNumber=DOC20260106071242
+      final response = await apiCalls.getMethod(url);
+
+      debugPrint("➡️ Status Code: ${response.statusCode}");
+      debugPrint("➡️ Raw Response: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        final jsonData = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+
+        debugPrint("🧾 Parsed JSON Type: ${jsonData.runtimeType}");
+        debugPrint("🧾 JSON Keys: ${jsonData.keys}");
+
+        salesReportDetails.value =
+            SalesDocumentModel.fromJson(jsonData);
+
+        debugPrint("✅ Sales document parsed successfully");
+      } else {
+        debugPrint("❌ API failed with status: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      debugPrint("❌ Purchase Report Error: $e");
+      debugPrint("📌 StackTrace: $st");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
 
 
 }

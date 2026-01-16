@@ -25,6 +25,7 @@ static const String updatePharmacystore ="api/item/update";
 static const String getRackManagement = "api/rack-order/";
 static const String deleteUser = "rack-order/";
 static const String purchaseReport = "purchase/report/get-purchase-invoice";
+static const String salesReport = "sale/report/get-sale-invoice";
 static const String searchInVoiceItem ="stock/get-distinct-itemName";
 static const String searchInVoiceByName = "stock/get-itemCode-by-itemName-enhanced?itemName";
 static const String searchManualStockByName = "api/item/search-by-itemname";
@@ -36,5 +37,7 @@ static const String customerManagement = "customerRegister";
 static const String searchCustomerOrder ="get-orderId-by-search?";
 static const String addPurchaseVoice ="purchase/add";
 static const String fetchInvoiceData= "purchase/report/get-purchase-invoice-details";
+static const String fetchSalesReport ="sale/report/get-sale-invoice-details";
+
 
 }
