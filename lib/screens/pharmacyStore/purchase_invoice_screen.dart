@@ -29,213 +29,434 @@ class PurchaseInvoiceScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            /// STORE DROPDOWN
-            _buildDropdownOnly(
-              label: "Stores",
-              controller: pharmacyController,
-            ),
+      body:
 
-            const SizedBox(height: 8),
+      // Padding(
+      //   padding: const EdgeInsets.all(12),
+      //   child: Column(
+      //     children: [
+      //       /// STORE DROPDOWN
+      //       _buildDropdownOnly(
+      //         label: "Stores",
+      //         controller: pharmacyController,
+      //       ),
+      //
+      //       const SizedBox(height: 8),
+      //
+      //       /// 🔹 STORE DETAILS (EXPAND / COLLAPSE)
+      //       Obx(() {
+      //         final store = pharmacyController.selectedStore.value;
+      //
+      //         if (store == null) return const SizedBox();
+      //
+      //         return Column(
+      //           crossAxisAlignment: CrossAxisAlignment.start,
+      //           children: [
+      //
+      //             /// 🔹 HEADER (CLICK TO TOGGLE)
+      //             GestureDetector(
+      //               onTap: () =>
+      //               pharmacyController.isStoreExpanded.value =
+      //               !pharmacyController.isStoreExpanded.value,
+      //               child: Container(
+      //                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      //                 decoration: BoxDecoration(
+      //                   color: Colors.green.shade50,
+      //                   borderRadius: BorderRadius.circular(8),
+      //                   border: Border.all(color: Colors.green),
+      //                 ),
+      //                 child: Row(
+      //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //                   children: [
+      //                     const Text(
+      //                       "Store Details",
+      //                       style: TextStyle(
+      //                         fontWeight: FontWeight.bold,
+      //                       ),
+      //                     ),
+      //                     Icon(
+      //                       pharmacyController.isStoreExpanded.value
+      //                           ? Icons.keyboard_arrow_up
+      //                           : Icons.keyboard_arrow_down,
+      //                     ),
+      //                   ],
+      //                 ),
+      //               ),
+      //             ),
+      //
+      //             /// 🔹 DETAILS BODY
+      //             if (pharmacyController.isStoreExpanded.value)
+      //               Container(
+      //                 margin: const EdgeInsets.only(top: 6),
+      //                 padding: const EdgeInsets.all(12),
+      //                 decoration: BoxDecoration(
+      //                   color: Colors.white,
+      //                   borderRadius: BorderRadius.circular(8),
+      //                   boxShadow: [
+      //                     BoxShadow(
+      //                       color: Colors.grey.shade300,
+      //                       blurRadius: 4,
+      //                     ),
+      //                   ],
+      //                 ),
+      //                 child: Column(
+      //                   children: [
+      //                     _infoRow("Store ID", store.id),
+      //                     _infoRow("Name", store.name),
+      //                     _infoRow("Type", store.type),
+      //                     _infoRow("Location", store.location),
+      //                     _infoRow("District", store.district),
+      //                     _infoRow("State", store.state),
+      //                     _infoRow("PinCode", store.pincode),
+      //                     _infoRow("Owner", store.owner),
+      //                     _infoRow("Owner Contact", store.ownerContact),
+      //                     _infoRow("GST Number", store.gstNumber),
+      //                   ],
+      //                 ),
+      //               ),
+      //           ],
+      //         );
+      //       }),
+      //
+      //       const SizedBox(height: 12),
+      //
+      //       /// CUSTOMER ROW
+      //       Row(
+      //         children: [
+      //           Expanded(
+      //             child: SizedBox(
+      //               height: 52, // 👈 reduce height (try 36–44)
+      //               child: TextField(
+      //                 controller: pharmacyController.invoiceNoCtrl,
+      //                 style: const TextStyle(fontSize: 13), // 👈 smaller text
+      //                 decoration: const InputDecoration(
+      //                   labelText: "Invoice No",
+      //                   isDense: true, // 👈 very important
+      //                   contentPadding: EdgeInsets.symmetric(
+      //                     horizontal: 10,
+      //                     vertical: 8,
+      //                   ),
+      //                   border: OutlineInputBorder(),
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //
+      //           const SizedBox(width: 8),
+      //           Expanded(
+      //             child: SizedBox(
+      //               height: 52, // 👈 reduce height (try 36–44)
+      //               child: TextField(
+      //                 controller: pharmacyController.supplierCodeCtrl,
+      //                 style: const TextStyle(fontSize: 13), // 👈 smaller text
+      //                 keyboardType: TextInputType.phone,
+      //                 decoration: const InputDecoration(
+      //                   labelText: "Supplier Code",
+      //                   isDense: true, // 👈 very important
+      //                   contentPadding: EdgeInsets.symmetric(
+      //                     horizontal: 10,
+      //                     vertical: 8,
+      //                   ),
+      //                   border: OutlineInputBorder(),
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //       SizedBox(height: 10,),
+      //       Row(
+      //         children: [
+      //           Expanded(
+      //             child: SizedBox(
+      //               height: 52, // 👈 reduce height (try 36–44)
+      //               child: TextField(
+      //                 controller: pharmacyController.supplierNameCtrl,
+      //                 style: const TextStyle(fontSize: 13), // 👈 smaller text
+      //                 decoration: const InputDecoration(
+      //                   labelText: "Supplier Name",
+      //                   isDense: true, // 👈 very important
+      //                   contentPadding: EdgeInsets.symmetric(
+      //                     horizontal: 10,
+      //                     vertical: 8,
+      //                   ),
+      //                   border: OutlineInputBorder(),
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //           const SizedBox(width: 8),
+      //           Expanded(
+      //             child: SizedBox(
+      //               height: 52,
+      //               child: TextField(
+      //                 controller: pharmacyController.purchaseDateCtrl,
+      //                 style: const TextStyle(fontSize: 13), // 👈 smaller text
+      //                 readOnly: true,
+      //                 decoration: const InputDecoration(
+      //                   labelText: "PurChase Date",
+      //                   isDense: true, // 👈 very important
+      //                   contentPadding: EdgeInsets.symmetric(
+      //                     horizontal: 10,
+      //                     vertical: 8,
+      //                   ),
+      //                   border: OutlineInputBorder(),
+      //
+      //                 ),
+      //                 onTap: () async {
+      //                   DateTime? pickedDate = await showDatePicker(
+      //                     context: Get.context!,          // or context
+      //                     initialDate: DateTime.now(),
+      //                     firstDate: DateTime(2000),
+      //                     lastDate: DateTime(2100),
+      //                   );
+      //
+      //                   if (pickedDate != null) {
+      //                     // format: yyyy-MM-dd (API friendly)
+      //                     String formattedDate =
+      //                         "${pickedDate.year.toString().padLeft(4, '0')}-"
+      //                         "${pickedDate.month.toString().padLeft(2, '0')}-"
+      //                         "${pickedDate.day.toString().padLeft(2, '0')}";
+      //
+      //                     pharmacyController.purchaseDateCtrl.text = formattedDate;
+      //                   }
+      //                 },
+      //               ),
+      //             )
+      //
+      //           ),
+      //         ],
+      //       ),
+      //
+      //       const SizedBox(height: 16),
+      //
+      //       /// ITEMS LIST
+      //       Expanded(
+      //         child: Obx(() {
+      //           return ListView.builder(
+      //             physics: pharmacyController.searchedItems.isNotEmpty
+      //                 ? const NeverScrollableScrollPhysics()
+      //                 : const AlwaysScrollableScrollPhysics(),
+      //
+      //             itemCount: pharmacyController.purChaseItemForms.length,
+      //             itemBuilder: (context, index) {
+      //               return _itemContainer(
+      //                 context,
+      //                 pharmacyController,
+      //                 pharmacyController.purChaseItemForms[index],
+      //                 index,
+      //               );
+      //             },
+      //           );
+      //         }),
+      //       ),
+      //
+      //       Align(
+      //         alignment: Alignment.centerRight,
+      //         child: ElevatedButton.icon(
+      //           onPressed: pharmacyController.addItems,
+      //           icon: const Icon(Icons.add),
+      //           label: const Text("Add Item"),
+      //         ),
+      //       ),
+      //       SizedBox(height: 30,)
+      //     ],
+      //   ),
+      // ),
 
-            /// 🔹 STORE DETAILS (EXPAND / COLLAPSE)
-            Obx(() {
-              final store = pharmacyController.selectedStore.value;
+      SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// STORE DROPDOWN
+              _buildDropdownOnly(
+                label: "Stores",
+                controller: pharmacyController,
+              ),
 
-              if (store == null) return const SizedBox();
+              const SizedBox(height: 8),
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              /// STORE DETAILS (EXPAND / COLLAPSE)
+              Obx(() {
+                final store = pharmacyController.selectedStore.value;
+                if (store == null) return const SizedBox();
 
-                  /// 🔹 HEADER (CLICK TO TOGGLE)
-                  GestureDetector(
-                    onTap: () =>
-                    pharmacyController.isStoreExpanded.value =
-                    !pharmacyController.isStoreExpanded.value,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.green),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Store Details",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// HEADER (CLICK TO TOGGLE)
+                    GestureDetector(
+                      onTap: () => pharmacyController.isStoreExpanded.value =
+                      !pharmacyController.isStoreExpanded.value,
+                      child: Container(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Store Details",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          Icon(
-                            pharmacyController.isStoreExpanded.value
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                          ),
-                        ],
+                            Icon(
+                              pharmacyController.isStoreExpanded.value
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    /// DETAILS BODY
+                    if (pharmacyController.isStoreExpanded.value)
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.shade300,
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _infoRow("Store ID", store.id),
+                            _infoRow("Name", store.name),
+                            _infoRow("Type", store.type),
+                            _infoRow("Location", store.location),
+                            _infoRow("District", store.district),
+                            _infoRow("State", store.state),
+                            _infoRow("PinCode", store.pincode),
+                            _infoRow("Owner", store.owner),
+                            _infoRow("Owner Contact", store.ownerContact),
+                            _infoRow("GST Number", store.gstNumber),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              }),
+
+              const SizedBox(height: 12),
+
+              /// CUSTOMER ROW
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: TextField(
+                        controller: pharmacyController.invoiceNoCtrl,
+                        style: const TextStyle(fontSize: 13),
+                        decoration: const InputDecoration(
+                          labelText: "Invoice No",
+                          isDense: true,
+                          contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ),
                   ),
-
-                  /// 🔹 DETAILS BODY
-                  if (pharmacyController.isStoreExpanded.value)
-                    Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.shade300,
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          _infoRow("Store ID", store.id),
-                          _infoRow("Name", store.name),
-                          _infoRow("Type", store.type),
-                          _infoRow("Location", store.location),
-                          _infoRow("District", store.district),
-                          _infoRow("State", store.state),
-                          _infoRow("PinCode", store.pincode),
-                          _infoRow("Owner", store.owner),
-                          _infoRow("Owner Contact", store.ownerContact),
-                          _infoRow("GST Number", store.gstNumber),
-                        ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: TextField(
+                        controller: pharmacyController.supplierCodeCtrl,
+                        style: const TextStyle(fontSize: 13),
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          labelText: "Supplier Code",
+                          isDense: true,
+                          contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ),
+                  ),
                 ],
-              );
-            }),
+              ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
-            /// CUSTOMER ROW
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 52, // 👈 reduce height (try 36–44)
-                    child: TextField(
-                      controller: pharmacyController.invoiceNoCtrl,
-                      style: const TextStyle(fontSize: 13), // 👈 smaller text
-                      decoration: const InputDecoration(
-                        labelText: "Invoice No",
-                        isDense: true, // 👈 very important
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: TextField(
+                        controller: pharmacyController.supplierNameCtrl,
+                        style: const TextStyle(fontSize: 13),
+                        decoration: const InputDecoration(
+                          labelText: "Supplier Name",
+                          isDense: true,
+                          contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          border: OutlineInputBorder(),
                         ),
-                        border: OutlineInputBorder(),
                       ),
                     ),
                   ),
-                ),
-
-                const SizedBox(width: 8),
-                Expanded(
-                  child: SizedBox(
-                    height: 52, // 👈 reduce height (try 36–44)
-                    child: TextField(
-                      controller: pharmacyController.supplierCodeCtrl,
-                      style: const TextStyle(fontSize: 13), // 👈 smaller text
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: "Supplier Code",
-                        isDense: true, // 👈 very important
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: TextField(
+                        controller: pharmacyController.purchaseDateCtrl,
+                        style: const TextStyle(fontSize: 13),
+                        readOnly: true,
+                        decoration: const InputDecoration(
+                          labelText: "Purchase Date",
+                          isDense: true,
+                          contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          border: OutlineInputBorder(),
                         ),
-                        border: OutlineInputBorder(),
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: Get.context!,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+
+                          if (pickedDate != null) {
+                            String formattedDate =
+                                "${pickedDate.year.toString().padLeft(4, '0')}-"
+                                "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                "${pickedDate.day.toString().padLeft(2, '0')}";
+                            pharmacyController.purchaseDateCtrl.text = formattedDate;
+                          }
+                        },
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10,),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 52, // 👈 reduce height (try 36–44)
-                    child: TextField(
-                      controller: pharmacyController.supplierNameCtrl,
-                      style: const TextStyle(fontSize: 13), // 👈 smaller text
-                      decoration: const InputDecoration(
-                        labelText: "Supplier Name",
-                        isDense: true, // 👈 very important
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: SizedBox(
-                    height: 52,
-                    child: TextField(
-                      controller: pharmacyController.purchaseDateCtrl,
-                      style: const TextStyle(fontSize: 13), // 👈 smaller text
-                      readOnly: true,
-                      decoration: const InputDecoration(
-                        labelText: "PurChase Date",
-                        isDense: true, // 👈 very important
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
-                        ),
-                        border: OutlineInputBorder(),
+                ],
+              ),
 
-                      ),
-                      onTap: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                          context: Get.context!,          // or context
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
+              const SizedBox(height: 16),
 
-                        if (pickedDate != null) {
-                          // format: yyyy-MM-dd (API friendly)
-                          String formattedDate =
-                              "${pickedDate.year.toString().padLeft(4, '0')}-"
-                              "${pickedDate.month.toString().padLeft(2, '0')}-"
-                              "${pickedDate.day.toString().padLeft(2, '0')}";
-
-                          pharmacyController.purchaseDateCtrl.text = formattedDate;
-                        }
-                      },
-                    ),
-                  )
-
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            /// ITEMS LIST
-            Expanded(
-              child: Obx(() {
+              /// ITEMS LIST
+              Obx(() {
                 return ListView.builder(
-                  physics: pharmacyController.searchedItems.isNotEmpty
-                      ? const NeverScrollableScrollPhysics()
-                      : const AlwaysScrollableScrollPhysics(),
-
+                  shrinkWrap: true, // 🔹 important
+                  physics: const NeverScrollableScrollPhysics(), // let scrollview handle
                   itemCount: pharmacyController.purChaseItemForms.length,
                   itemBuilder: (context, index) {
                     return _itemContainer(
@@ -247,20 +468,22 @@ class PurchaseInvoiceScreen extends StatelessWidget {
                   },
                 );
               }),
-            ),
 
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                onPressed: pharmacyController.addItems,
-                icon: const Icon(Icons.add),
-                label: const Text("Add Item"),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: pharmacyController.addItems,
+                  icon: const Icon(Icons.add),
+                  label: const Text("Add Item"),
+                ),
               ),
-            ),
-            SizedBox(height: 30,)
-          ],
+
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
-      ),
+      )
+
     );
   }
 
