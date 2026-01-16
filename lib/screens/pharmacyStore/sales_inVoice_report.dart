@@ -404,36 +404,6 @@ class SalesInvoiceReport extends StatelessWidget {
   String _fmtNum(num? v) => v == null ? "-" : v.toStringAsFixed(2);
 
 
-
-  // Widget _row(String title, String value) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 2), // 🔽 less vertical space
-  //     child: Row(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         SizedBox(
-  //           width: 130, // 🔽 reduced label width
-  //           child: Text(
-  //             "$title:",
-  //             style: const TextStyle(
-  //               fontWeight: FontWeight.w600,
-  //               fontSize: 12, // 🔽 smaller text
-  //             ),
-  //           ),
-  //         ),
-  //         const SizedBox(width: 6), // 🔽 less gap
-  //         Expanded(
-  //           child: Text(
-  //             value,
-  //             style: const TextStyle(fontSize: 12), // 🔽 smaller text
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-
   /// 🔹 Date Field Widget
   Widget _dateField(
       BuildContext context, {

@@ -346,33 +346,6 @@ class PurchaseInvoiceScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Expanded(
-                  //   child: entry.key == "Item Name"
-                  //       ? _itemNameSearchField(pharmacyController, form, index)
-                  //       : Obx(() {
-                  //     final hasError = form.fieldErrors[entry.key]!.value;
-                  //
-                  //     return TextFormField(
-                  //       controller: entry.value,
-                  //       readOnly: isAutoField,
-                  //       decoration: InputDecoration(
-                  //         border: const OutlineInputBorder(),
-                  //         isDense: true,
-                  //         errorText: hasError ? "Required" : null,
-                  //         enabledBorder: OutlineInputBorder(
-                  //           borderSide: BorderSide(
-                  //             color: hasError ? Colors.red : Colors.grey,
-                  //           ),
-                  //         ),
-                  //         focusedBorder: OutlineInputBorder(
-                  //           borderSide: BorderSide(
-                  //             color: hasError ? Colors.red : Colors.blue,
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     );
-                  //   }),
-                  // ),
 
                   Expanded(
                     child: entry.key == "Item Name"
