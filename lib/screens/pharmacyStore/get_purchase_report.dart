@@ -19,20 +19,7 @@ class PurchaseReport extends StatelessWidget {
   final TextEditingController invoiceController = TextEditingController();
   final TextEditingController supplierController = TextEditingController();
 
-  Future<void> _selectDate(
-      BuildContext context, TextEditingController controller) async {
-    DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
 
-    if (pickedDate != null) {
-      controller.text =
-      "${pickedDate.day}-${pickedDate.month}-${pickedDate.year}";
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +144,8 @@ class PurchaseReport extends StatelessWidget {
 
             Expanded(
               child: Obx(() {
-                if (pharmacyController.isLoading.value) {
+                if (pharmacyController.isLoading.value &&
+                    pharmacyController.purchaseList.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -166,22 +154,32 @@ class PurchaseReport extends StatelessWidget {
                 }
 
                 return ListView.builder(
-                  itemCount: pharmacyController.purchaseList.length,
+                  controller: pharmacyController.purchaseScrollController,
+                  itemCount:
+                  pharmacyController.purchaseList.length +
+                      (pharmacyController.isPurchaseLoadingMore.value ? 1 : 0),
                   itemBuilder: (context, index) {
+                    // 🔹 Bottom loader
+                    if (index == pharmacyController.purchaseList.length) {
+                      return const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
                     final item = pharmacyController.purchaseList[index];
 
                     return Obx(() {
-                      final isExpanded = pharmacyController.expandedIndex.value == index;
+                      final isExpanded =
+                          pharmacyController.expandedIndex.value == index;
 
                       return GestureDetector(
                         onTap: () async {
-                          // 🔹 toggle expand
                           if (isExpanded) {
                             pharmacyController.expandedIndex.value = -1;
                           } else {
                             pharmacyController.expandedIndex.value = index;
 
-                            // 🔹 call API with invoice no
                             await pharmacyController.getInVoiceData(
                               item.invoiceNo ?? "",
                             );
@@ -204,15 +202,14 @@ class PurchaseReport extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-
-                              /// 🔹 BASIC INFO (always visible)
                               _row("Invoice No", item.invoiceNo ?? "-"),
-                              _row("Date",
-                                  item.date?.toString().split(' ').first ?? "-"),
+                              _row(
+                                "Date",
+                                item.date?.toString().split(' ').first ?? "-",
+                              ),
                               _row("Supplier", item.suppName ?? "-"),
                               _row("Store ID", item.storeId ?? "-"),
 
-                              /// 🔹 EXPANDABLE DETAILS
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 300),
                                 child: isExpanded
@@ -226,9 +223,9 @@ class PurchaseReport extends StatelessWidget {
                     });
                   },
                 );
-
               }),
             ),
+
 
           ],
         ),
@@ -237,23 +234,21 @@ class PurchaseReport extends StatelessWidget {
   }
 
   Widget _invoiceDetailsView(AddPharmacyController controller) {
-    final data = controller.invoiceDetails.value;
-
-    if (controller.isLoading.value) {
+    // 🔹 Loading (initial)
+    if (controller.isLoading.value && controller.invoiceDetails.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(12),
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (data == null || data.purchases == null || data.purchases!.isEmpty) {
+    // 🔹 Empty state
+    if (controller.invoiceDetails.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(12),
         child: Text("No invoice details"),
       );
     }
-
-    final invoice = data.purchases!.first;
 
     return Container(
       margin: const EdgeInsets.only(top: 10),
@@ -272,86 +267,74 @@ class PurchaseReport extends StatelessWidget {
           ),
           const SizedBox(height: 6),
 
-          _twoRow("Bill Line ID", invoice.billNoLineId ?? "-",
-              "Document No", invoice.docNumber ?? "-"),
+          /// 🔹 PAGINATED LIST
+          ListView.builder(
+            controller: controller.invoiceScrollController,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.invoiceDetails.length +
+                (controller.isInvoiceLoadingMore.value ? 1 : 0),
+            itemBuilder: (context, index) {
+              // 🔄 bottom loader
+              if (index == controller.invoiceDetails.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          _twoRow("Readable Doc No", invoice.readableDocNo ?? "-",
-              "Purchase Date", _fmtDate(invoice.date)),
+              final invoice = controller.invoiceDetails[index];
 
-          _twoRow("Bill No", invoice.billNo?.toString() ?? "-",
-              "Bill Date", _fmtDate(invoice.billDt)),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-          _twoRow("Item Code", invoice.itemCode ?? "-",
-              "Item Name", invoice.itemName ?? "-"),
+                  const Divider(),
 
-          _twoRow("Batch No", invoice.batchNo ?? "-",
-              "Expiry Date", _fmtDate(invoice.expiryDate)),
+                  _twoRow("Bill Line ID", invoice.billNoLineId ?? "-",
+                      "Document No", invoice.docNumber ?? "-"),
 
-          _twoRow("Category Code", invoice.catCode ?? "-",
-              "Category Name", invoice.catName ?? "-"),
+                  _twoRow("Readable Doc No", invoice.readableDocNo ?? "-",
+                      "Purchase Date", _fmtDate(invoice.date)),
 
-          _twoRow("Mfg Code", invoice.mfacCode ?? "-",
-              "Mfg Name", invoice.mfacName ?? "-"),
+                  _twoRow("Bill No", invoice.billNo?.toString() ?? "-",
+                      "Bill Date", _fmtDate(invoice.billDt)),
 
-          _twoRow("Brand", invoice.brandName ?? "-",
-              "Packing", invoice.packing ?? "-"),
+                  _twoRow("Item Code", invoice.itemCode ?? "-",
+                      "Item Name", invoice.itemName ?? "-"),
 
-          _twoRow("DC Year", invoice.dcYear ?? "-",
-              "DC Prefix", invoice.dcPrefix ?? "-"),
+                  _twoRow("Batch No", invoice.batchNo ?? "-",
+                      "Expiry Date", _fmtDate(invoice.expiryDate)),
 
-          _twoRow("DC Sr No", invoice.dcSrno ?? "-",
-              "Store ID", invoice.storeId ?? "-"),
+                  _twoRow("Category Code", invoice.catCode ?? "-",
+                      "Category Name", invoice.catName ?? "-"),
 
-          _twoRow("Qty", _fmtNum(invoice.qty),
-              "Pack Qty", _fmtNum(invoice.packQty)),
+                  _twoRow("Mfg Code", invoice.mfacCode ?? "-",
+                      "Mfg Name", invoice.mfacName ?? "-"),
 
-          _twoRow("Loose Qty", _fmtNum(invoice.looseQty),
-              "Sch Pack Qty", _fmtNum(invoice.schPackQty)),
+                  _twoRow("Brand", invoice.brandName ?? "-",
+                      "Packing", invoice.packing ?? "-"),
 
-          _twoRow("Sch Loose Qty", _fmtNum(invoice.schLooseQty),
-              "Sch Disc", _fmtNum(invoice.schDisc)),
+                  _twoRow("Qty", _fmtNum(invoice.qty),
+                      "Pack Qty", _fmtNum(invoice.packQty)),
 
-          _twoRow("Pur Rate", _fmtNum(invoice.purRate),
-              "Pur Value", _fmtNum(invoice.purValue)),
+                  _twoRow("Loose Qty", _fmtNum(invoice.looseQty),
+                      "Total Purchase", _fmtNum(invoice.totalPurchasePrice)),
 
-          _twoRow("Disc %", _fmtNum(invoice.discPer),
-              "Margin", _fmtNum(invoice.margin)),
+                  _twoRow("CGST Amt", _fmtNum(invoice.cgstamt),
+                      "SGST Amt", _fmtNum(invoice.sgstamt)),
 
-          _twoRow("Supp Code", invoice.suppCode ?? "-",
-              "Supp Name", invoice.suppName ?? "-"),
-
-          _twoRow("Disc Value", _fmtNum(invoice.discValue),
-              "Taxable Amt", _fmtNum(invoice.taxableAmt)),
-
-          _twoRow("GST Code", invoice.gstCode ?? "-",
-              "Total Amt", _fmtNum(invoice.total)),
-
-          _twoRow("Cess %", _fmtNum(invoice.cessPer),
-              "Cess Amt", _fmtNum(invoice.cessAmt)),
-
-          _twoRow("Discount", _fmtNum(invoice.discount),
-              "After Discount", _fmtNum(invoice.afterDiscount)),
-
-          _twoRow("Total Purchase", _fmtNum(invoice.totalPurchasePrice),
-              "MRP", _fmtNum(invoice.mrp)),
-
-          _twoRow("IGST %", _fmtNum(invoice.igstper),
-              "IGST Amt", _fmtNum(invoice.igstamt)),
-
-          _twoRow("CGST %", _fmtNum(invoice.cgstper),
-              "CGST Amt", _fmtNum(invoice.cgstamt)),
-
-          _twoRow("SGST %", _fmtNum(invoice.sgstper),
-              "SGST Amt", _fmtNum(invoice.sgstamt)),
-
-          _twoRow("Sale Rate", _fmtNum(invoice.saleRate),
-              "Posted", invoice.post ?? "-"),
+                  _twoRow("IGST Amt", _fmtNum(invoice.igstamt),
+                      "Total Amt", _fmtNum(invoice.total)),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
-
-
   }
+
 
   Widget _twoRow(
       String t1,

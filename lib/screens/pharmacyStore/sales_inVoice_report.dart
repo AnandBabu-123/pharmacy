@@ -38,7 +38,7 @@ class SalesInvoiceReport extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Purchase Report"),
+        title: const Text("Sales Report"),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -141,7 +141,7 @@ class SalesInvoiceReport extends StatelessWidget {
                         return;
                       }
 
-                      pharmacyController.getSalesReport(
+                      pharmacyController.fetchSalesReport(
                         selectedStore!.userIdStoreId!,
                       );
                     },
@@ -157,34 +157,43 @@ class SalesInvoiceReport extends StatelessWidget {
 
             Expanded(
               child: Obx(() {
-                if (pharmacyController.isLoading.value) {
+                if (pharmacyController.salesIsLoading.value &&
+                    pharmacyController.salesInvoiceList.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (pharmacyController.inVoiceList.isEmpty) {
+                if (pharmacyController.salesInvoiceList.isEmpty) {
                   return const Center(child: Text("No Data Found"));
                 }
 
                 return ListView.builder(
-                  itemCount: pharmacyController.inVoiceList.length,
+                  controller: pharmacyController.salesScrollController,
+                  itemCount: pharmacyController.salesInvoiceList.length +
+                      (pharmacyController.salesIsLoadingMore.value ? 1 : 0),
                   itemBuilder: (context, index) {
-                    final item = pharmacyController.inVoiceList[index];
+                    // Bottom loader
+                    if (index == pharmacyController.salesInvoiceList.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    final item = pharmacyController.salesInvoiceList[index];
 
                     return Obx(() {
-                      final isExpanded = pharmacyController.expandedIndex.value == index;
+                      final isExpanded =
+                          pharmacyController.salesExpandedIndex.value == index;
 
                       return GestureDetector(
                         onTap: () async {
-                          // 🔹 toggle expand
                           if (isExpanded) {
-                            pharmacyController.expandedIndex.value = -1;
+                            pharmacyController.salesExpandedIndex.value = -1;
                           } else {
-                            pharmacyController.expandedIndex.value = index;
+                            pharmacyController.salesExpandedIndex.value = index;
 
-                            // 🔹 call API with invoice no
-                            await pharmacyController.getSalesData(
-                              item.docNumber ?? "",
-                            );
+                            // Call API to get detailed sales invoice info
+                            await pharmacyController.getSalesData(item.docNumber ?? "");
                           }
                         },
                         child: Container(
@@ -204,15 +213,12 @@ class SalesInvoiceReport extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-
-                              /// 🔹 BASIC INFO (always visible)
                               _row("Document Number", item.docNumber ?? "-"),
-                              _row("Date",
-                                  item.date?.toString().split(' ').first ?? "-"),
+                              _row("Date", item.date?.split(' ').first ?? "-"),
                               _row("Customer Name", item.custName ?? "-"),
                               _row("Store ID", item.storeId ?? "-"),
 
-                              /// 🔹 EXPANDABLE DETAILS
+                              // Expandable details
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 300),
                                 child: isExpanded
@@ -226,9 +232,9 @@ class SalesInvoiceReport extends StatelessWidget {
                     });
                   },
                 );
-
               }),
             ),
+
 
           ],
         ),

@@ -55,10 +55,6 @@ class AddPharmacyController extends GetxController {
   final RxBool isStoreExpanded = false.obs;
 
 
-  var currentPage = 0.obs;
-  var pageSize = 10.obs;
-  var totalPages = 1.obs;
-  var isFetchingMore = false.obs;
 
   RxList<PurchaseInvoiceItems> purChaseItemForms =
       <PurchaseInvoiceItems>[].obs;
@@ -66,11 +62,14 @@ class AddPharmacyController extends GetxController {
   RxList<ItemSearchModel> searchedItems =
       <ItemSearchModel>[].obs;
 
-  var expandedIndex = (-1).obs;   // which item is expanded
-  var invoiceDetails = Rxn<ReportInvoiceData>(); // response model
+
+  // var invoiceDetails = Rxn<ReportInvoiceData>(); // response model
   var salesReportDetails = Rxn<SalesDocumentModel>();
 
   final Dio dio = Dio();
+
+
+  RxBool isLoadingMore = false.obs;
 
   final invoiceNoCtrl = TextEditingController();
   final supplierCodeCtrl = TextEditingController();
@@ -84,6 +83,7 @@ class AddPharmacyController extends GetxController {
   var brandCtrls = <TextEditingController>[].obs;
   var gstCtrls = <TextEditingController>[].obs;
   var hsnCtrls = <TextEditingController>[].obs;
+
 
   // Search results per card
 
@@ -315,13 +315,130 @@ class AddPharmacyController extends GetxController {
   var isLoading = false.obs;
   var pharmacyList = <ItemCodeMasters>[].obs;
 
+  ///  Paginations
+
+  var currentPage = 0.obs;
+  var pageSize = 10.obs;
+  var totalPages = 1.obs;
+  var isFetchingMore = false.obs;
+
+  var purchaseCurrentPage = 0.obs;
+  var purchaseTotalPages = 1.obs;
+  var purchasePageSize = 10.obs;
+  var isPurchaseLoadingMore = false.obs;
+
+  // 🔹 Invoice pagination state
+  var invoiceCurrentPage = 0.obs;
+  var invoiceTotalPages = 1.obs;
+  var invoicePageSize = 10.obs;
+  var isInvoiceLoadingMore = false.obs;
+  final lastInvoiceNo = ''.obs;
+// 🔹 Data
+  RxList<PurchaseInvoice> invoiceDetails = <PurchaseInvoice>[].obs;
+
+// 🔹 Expanded row
+  var expandedIndex = (-1).obs;
+
+  // Pagination for sales report
+  var salesCurrentPage = 0.obs;
+  var salesPageSize = 10.obs;
+  var salesTotalPages = 1.obs;
+  var salesIsLoadingMore = false.obs;
+
+// Invoice list
+  RxList<Invoice> salesInvoiceList = <Invoice>[].obs;
+
+// Expanded row index
+  var salesExpandedIndex = (-1).obs;
+
+// Loading
+  var salesIsLoading = false.obs;
+
+// Scroll controller
+  final ScrollController salesScrollController = ScrollController();
+
+
+// 🔹 Scroll controller
+  final ScrollController invoiceScrollController = ScrollController();
+
+  final ScrollController purchaseScrollController = ScrollController();
+  final ScrollController scrollController = ScrollController();
+
   @override
   void onReady() {
     super.onReady();
     fetchStores();
     getPharmacyDropDown();
     addItems();
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 100 &&
+          !isLoadingMore.value) {
+        loadMore();
+      }
+    });
+
+    purchaseScrollController.addListener(() {
+      if (purchaseScrollController.position.pixels >=
+          purchaseScrollController.position.maxScrollExtent - 100 &&
+          !isPurchaseLoadingMore.value) {
+        loadMorePurchase();
+      }
+    });
+
+    invoiceScrollController.addListener(() {
+      if (invoiceScrollController.position.pixels >=
+          invoiceScrollController.position.maxScrollExtent - 100 &&
+          !isInvoiceLoadingMore.value) {
+        loadMoreInvoice();
+      }
+    });
+
+    salesScrollController.addListener(() {
+      if (salesScrollController.position.pixels >=
+          salesScrollController.position.maxScrollExtent - 100 &&
+          !salesIsLoadingMore.value) {
+        loadMoreSalesReport();
+      }
+    });
   }
+
+  void loadMoreSalesReport() {
+    if (salesCurrentPage.value >= salesTotalPages.value - 1) return;
+
+    final store = selectedStore.value;
+    if (store == null) return;
+
+    fetchSalesReport(
+      store.id!,
+      page: salesCurrentPage.value + 1,
+      size: salesPageSize.value,
+      isLoadMore: true,
+    );
+  }
+
+  void loadMoreInvoice() {
+    if (invoiceCurrentPage.value >= invoiceTotalPages.value - 1) return;
+
+    final invoiceNo = lastInvoiceNo.value;
+    if (invoiceNo.isEmpty) return;
+
+    getInVoiceData(
+      invoiceNo,
+      isLoadMore: true,
+    );
+  }
+
+  void loadMorePurchase() {
+    if (purchaseCurrentPage.value >= purchaseTotalPages.value - 1) return;
+
+    getPurChaseReport(
+      selectedStore.value?.userIdStoreId ?? "",
+      isLoadMore: true,
+    );
+  }
+
 
   Future<void> deleteUser(String rackBoxStoreIdSkuId) async {
     try {
@@ -531,9 +648,16 @@ class AddPharmacyController extends GetxController {
       String storeId, {
         int page = 0,
         int size = 10,
-      }) async {
+        bool isLoadMore = false,
+      }) async
+  {
     try {
-      isLoading.value = true;
+      if (isLoadMore) {
+        isLoadingMore.value = true;
+      } else {
+        isLoading.value = true;
+        searchResults.clear(); // ✅ clear only for first page
+      }
 
       await apiCalls.initializeDio();
 
@@ -547,13 +671,20 @@ class AddPharmacyController extends GetxController {
             ? jsonDecode(response.data)
             : response.data;
 
-        final pharmacyStoreModel = PharmacyStoreModel.fromJson(data);
+        final pharmacyStoreModel =
+        PharmacyStoreModel.fromJson(data);
 
-        searchResults.value =
+        final newItems =
             pharmacyStoreModel.itemCodeMasters ?? [];
 
-        // ✅ save pagination info
-        currentPage.value = pharmacyStoreModel.currentPage ?? 0;
+        if (isLoadMore) {
+          searchResults.addAll(newItems); // ✅ append
+        } else {
+          searchResults.assignAll(newItems); // ✅ replace
+        }
+
+        // ✅ pagination info
+        currentPage.value = pharmacyStoreModel.currentPage ?? page;
         totalPages.value = pharmacyStoreModel.totalPages ?? 1;
         pageSize.value = pharmacyStoreModel.pageSize ?? size;
       }
@@ -562,8 +693,27 @@ class AddPharmacyController extends GetxController {
       Get.snackbar("Error", "Failed to fetch pharmacy data");
     } finally {
       isLoading.value = false;
+      isLoadingMore.value = false;
     }
   }
+
+
+  void loadMore() {
+    if (currentPage.value >= totalPages.value - 1) return;
+
+    final store = selectedStore.value;
+    if (store == null) return;
+
+    searchPharmacyData(
+      store.id!,
+      page: currentPage.value + 1,
+      size: pageSize.value,
+      isLoadMore: true,
+    );
+  }
+
+
+
 
 
   // Future<void> searchPharmacyData(
@@ -906,14 +1056,26 @@ class AddPharmacyController extends GetxController {
 
 
   /// 🔹 CALL API WITH SELECTED STORE
-  Future<void> getPurChaseReport(String userIdStoreId) async {
+  Future<void> getPurChaseReport(
+      String userIdStoreId, {
+        bool isLoadMore = false,
+      }) async {
     try {
-      isLoading.value = true;
+      if (isLoadMore) {
+        isPurchaseLoadingMore.value = true;
+      } else {
+        isLoading.value = true;
+        purchaseCurrentPage.value = 0;
+        purchaseList.clear();
+      }
+
       await apiCalls.initializeDio();
 
       final response = await apiCalls.getMethod(
-        "${RouteUrls.purchaseReport}?userIdstoreId=$userIdStoreId",
-
+        "${RouteUrls.purchaseReport}"
+            "?userIdstoreId=$userIdStoreId"
+            "&page=${purchaseCurrentPage.value}"
+            "&size=${purchasePageSize.value}",
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -921,25 +1083,50 @@ class AddPharmacyController extends GetxController {
             ? jsonDecode(response.data)
             : response.data;
 
-        final List list = json['purchase'] ?? [];
+        final result =
+        PurchasePaginationResponse.fromJson(json);
 
-        purchaseList.value =
-            list.map((e) => PurchaseItem.fromJson(e)).toList();
+        if (isLoadMore) {
+          purchaseList.addAll(result.purchase);
+        } else {
+          purchaseList.assignAll(result.purchase);
+        }
+
+        purchaseCurrentPage.value = result.currentPage;
+        purchaseTotalPages.value = result.totalPages;
+        purchasePageSize.value = result.pageSize;
       }
     } catch (e) {
       debugPrint("❌ Purchase Report Error: $e");
     } finally {
       isLoading.value = false;
+      isPurchaseLoadingMore.value = false;
     }
   }
 
-  Future<void> getInVoiceData(String invoiceNo) async {
+
+  Future<void> getInVoiceData(
+      String invoiceNo, {
+        bool isLoadMore = false,
+      }) async {
     try {
-      isLoading.value = true;
+      lastInvoiceNo.value = invoiceNo;
+
+      if (isLoadMore) {
+        isInvoiceLoadingMore.value = true;
+      } else {
+        isLoading.value = true;
+        invoiceCurrentPage.value = 0;
+        invoiceDetails.clear();
+      }
+
       await apiCalls.initializeDio();
 
       final response = await apiCalls.getMethod(
-        "${RouteUrls.fetchInvoiceData}?invoiceNo=$invoiceNo",
+        "${RouteUrls.fetchInvoiceData}"
+            "?invoiceNo=$invoiceNo"
+            "&page=${invoiceCurrentPage.value}"
+            "&size=${invoicePageSize.value}",
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -947,22 +1134,45 @@ class AddPharmacyController extends GetxController {
             ? jsonDecode(response.data)
             : response.data;
 
-        invoiceDetails.value = ReportInvoiceData.fromJson(json);
+        final result = ReportInvoiceData.fromJson(json);
+
+        if (isLoadMore) {
+          invoiceDetails.addAll(result.purchases ?? []);
+        } else {
+          invoiceDetails.assignAll(result.purchases ?? []);
+        }
+
+        invoiceCurrentPage.value = result.currentPage ?? 0;
+        invoiceTotalPages.value = result.totalPages ?? 1;
+        invoicePageSize.value = result.pageSize ?? 10;
       }
     } catch (e) {
-      debugPrint("❌ Purchase Report Error: $e");
+      debugPrint("❌ Invoice Data Error: $e");
     } finally {
       isLoading.value = false;
+      isInvoiceLoadingMore.value = false;
     }
   }
 
-  Future<void> getSalesReport(String userIdStoreId) async {
+
+  Future<void> fetchSalesReport(
+      String userIdStoreId, {
+        int page = 0,
+        int size = 10,
+        bool isLoadMore = false,
+      }) async {
     try {
-      isLoading.value = true;
+      if (isLoadMore) {
+        salesIsLoadingMore.value = true;
+      } else {
+        salesIsLoading.value = true;
+        salesInvoiceList.clear(); // clear only on first page
+      }
+
       await apiCalls.initializeDio();
 
       final response = await apiCalls.getMethod(
-        "${RouteUrls.salesReport}?userIdstoreId=$userIdStoreId",
+        "${RouteUrls.salesReport}?userIdstoreId=$userIdStoreId&page=$page&size=$size",
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -970,24 +1180,30 @@ class AddPharmacyController extends GetxController {
             ? jsonDecode(response.data)
             : response.data;
 
-        debugPrint("🧾 JSON Keys: ${jsonData.keys}");
+        final salesReport = SalesReportModel.fromJson(jsonData);
 
-        final List list = jsonData['invoices'] ?? [];
+        final newInvoices = salesReport.invoices ?? [];
 
-        inVoiceList.value =
-            list.map((e) => Invoice.fromJson(e)).toList();
+        if (isLoadMore) {
+          salesInvoiceList.addAll(newInvoices);
+        } else {
+          salesInvoiceList.assignAll(newInvoices);
+        }
 
-        debugPrint("✅ Total invoices loaded: ${inVoiceList.length}");
-      } else {
-        debugPrint("❌ API failed with status: ${response.statusCode}");
+        // Update pagination info
+        salesCurrentPage.value = salesReport.currentPage ?? page;
+        salesPageSize.value = salesReport.pageSize ?? size;
+        salesTotalPages.value = salesReport.totalPages ?? 1;
       }
     } catch (e, st) {
       debugPrint("❌ Sales Report Error: $e");
       debugPrint("📌 StackTrace: $st");
     } finally {
-      isLoading.value = false;
+      salesIsLoading.value = false;
+      salesIsLoadingMore.value = false;
     }
   }
+
 
 
 

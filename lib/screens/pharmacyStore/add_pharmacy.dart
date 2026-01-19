@@ -22,8 +22,6 @@ class AddPharmacy extends StatelessWidget {
     return Scaffold(
       key: _scaffoldKey,
 
-
-
       appBar: AppBar(
         title: const Text(
           "Pharmacy Management",
@@ -47,94 +45,143 @@ class AddPharmacy extends StatelessWidget {
       ),
 
       /// 🌿 BODY BACKGROUND COLOR
-      body: Container(
-        color: const Color(0xFFF1F8E9),
-        child: Obx(() {
-          if (pharmacyController.isLoading.value &&
-              pharmacyController.pharmacyList.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body:
+      Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
 
-          if (pharmacyController.pharmacyList.isEmpty) {
-            return const Center(
-              child: Text(
-                "No Stores Found",
-                style: TextStyle(fontSize: 16),
-              ),
-            );
-          }
+            /// 🔹 ROW 1: Item | Brand | Manufacturer
+            Row(
+              children: [
+                Expanded(child: _buildTextField("Item", pharmacyController.itemName)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildTextField("Brand", pharmacyController.brand)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildTextField("Manufacturer", pharmacyController.manufacturer)),
+              ],
+            ),
 
-          return NotificationListener<ScrollNotification>(
-            onNotification: (scrollInfo) {
-              if (!pharmacyController.isLoading.value &&
-                  !pharmacyController.isFetchingMore.value &&
-                  scrollInfo.metrics.pixels ==
-                      scrollInfo.metrics.maxScrollExtent) {
-                pharmacyController.loadNextPage(); // 🔥 pagination call
-              }
-              return true;
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: pharmacyController.pharmacyList.length + 1,
-              itemBuilder: (context, index) {
-                /// 🔹 LOADER AT BOTTOM
-                if (index == pharmacyController.pharmacyList.length) {
-                  return Obx(() {
-                    return pharmacyController.isFetchingMore.value
-                        ? const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                        : const SizedBox();
-                  });
-                }
+            const SizedBox(height: 12),
 
-                final store = pharmacyController.pharmacyList[index];
-
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            /// 🔹 ROW 2: STORE DROPDOWN + SEARCH BUTTON
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: _buildDropdownOnly(
+                    label: "Stores",
+                    controller: pharmacyController,
                   ),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-                        /// STORE NAME
-                        Text(
-                          "Name : ${store.itemName ?? ""}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        _buildRow("Store ID", store.storeId),
-                        _buildRow("Item Code", store.itemCode),
-                        _buildRow("Item Name", store.itemName),
-                        _buildRow("Category", store.itemCategory),
-                        _buildRow("Sub Category", store.itemSubCategory),
-                        _buildRow("Manufacturer", store.manufacturer),
-                        _buildRow("Brand", store.brand),
-
-                        /// ✅ GST is int → convert safely
-                        _buildRow("GST %", store.gst?.toString()),
-
-                        _buildRow("HSN Code", store.hsnGroup),
-                      ],
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final store = pharmacyController.selectedStore.value;
+                      if (store != null && store.id != null) {
+                        pharmacyController.searchPharmacyData(store.id!);
+                      } else {
+                        Get.snackbar("Warning", "Please select a store");
+                      }
+                    },
+                    icon: const Icon(Icons.search),
+                    label: const Text("Search"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF90EE90),
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          );
-        }),
+
+            const SizedBox(height: 12),
+
+            /// 🔹 LIST VIEW
+            Expanded(
+              child: Obx(() {
+                if (pharmacyController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (pharmacyController.searchResults.isEmpty) {
+                  return const Center(child: Text("No data found"));
+                }
+
+                return Column(
+                  children: [
+                    /// 🔹 LIST
+                    Expanded(
+                      child: Obx(() {
+                        return ListView.separated(
+                          controller: pharmacyController.scrollController, // ✅ REQUIRED
+                          itemCount: pharmacyController.searchResults.length +
+                              (pharmacyController.isLoadingMore.value ? 1 : 0),
+                          separatorBuilder: (_, __) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+
+                            /// 🔄 Bottom loader
+                            if (index == pharmacyController.searchResults.length) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            final item = pharmacyController.searchResults[index];
+
+                            return Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.itemName ?? "-",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 8),
+
+                                    _infoRow("Store ID", item.storeId),
+                                    _infoRow("Item Code", item.itemCode),
+                                    _infoRow("Category", item.itemCategory),
+                                    _infoRow("Sub Category", item.itemSubCategory),
+                                    _infoRow("Manufacturer", item.manufacturer),
+                                    _infoRow("Brand", item.brand),
+                                    _infoRow("GST", item.gst?.toString()),
+
+                                    const Divider(height: 20),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                    )
+
+
+                    /// 🔹 PAGINATION BAR
+
+                  ],
+                );
+              }),
+            ),
+
+
+          ],
+        ),
       ),
 
 
@@ -146,6 +193,135 @@ class AddPharmacy extends StatelessWidget {
         },
         icon: const Icon(Icons.add),
         label: const Text("Add Item"),
+      ),
+    );
+  }
+
+  Widget _buildDropdownOnly({
+    required String label,
+    required AddPharmacyController controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 4),
+        Obx(() {
+          return DropdownButtonFormField<Stores>(
+            value: controller.selectedStore.value,
+            isExpanded: true,
+            hint: const Text("Select Store"),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            items: controller.storesList.map((store) {
+              return DropdownMenuItem<Stores>(
+                value: store,
+                child: Text(
+                  "${store.id ?? ""} - ${store.name ?? ""}",
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+            onChanged: (value) => controller.selectedStore.value = value,
+          );
+        }),
+      ],
+    );
+  }
+
+  /// 🔹 TEXT FIELD
+  Widget _buildTextField(String hint, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hint,
+        isDense: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+    );
+  }
+
+  Widget _paginationBar() {
+    return Obx(() {
+      final controller = pharmacyController;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            /// ◀ PREVIOUS
+            ElevatedButton(
+              onPressed: controller.currentPage.value > 0
+                  ? () {
+                final store =
+                    controller.selectedStore.value;
+                if (store != null) {
+                  controller.searchPharmacyData(
+                    store.id!,
+                    page: controller.currentPage.value - 1,
+                    size: controller.pageSize.value,
+                  );
+                }
+              }
+                  : null,
+              child: const Text("Prev"),
+            ),
+
+            /// PAGE INFO
+            Text(
+              "Page ${controller.currentPage.value + 1} "
+                  "of ${controller.totalPages.value}",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            /// NEXT ▶
+            ElevatedButton(
+              onPressed: controller.currentPage.value <
+                  controller.totalPages.value - 1
+                  ? () {
+                final store =
+                    controller.selectedStore.value;
+                if (store != null) {
+                  controller.searchPharmacyData(
+                    store.id!,
+                    page: controller.currentPage.value + 1,
+                    size: controller.pageSize.value,
+                  );
+                }
+              }
+                  : null,
+              child: const Text("Next"),
+            ),
+            SizedBox(height: 100,)
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _infoRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value ?? "-", style: const TextStyle(fontSize: 14)),
+          ),
+        ],
       ),
     );
   }

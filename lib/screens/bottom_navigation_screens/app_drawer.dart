@@ -304,6 +304,37 @@ class AppDrawer extends StatelessWidget {
                 ],
               ),
 
+              ExpansionTile(
+                leading: const Icon(Icons.people_alt),
+                title: const Text("Retail PurChase",style: TextStyle(
+                  fontSize: 16,          // ⬇ reduced from 18
+                  fontWeight: FontWeight.w600,
+                ),),
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.manage_accounts),
+                    title: const Text("Add Retail PurChase",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
+                    onTap: () {
+                      Get.toNamed(AppRoutes.retailerPurchaseView);
+                    },
+                  ),
+                  //
+                  // ListTile(
+                  //   leading: const Icon(Icons.manage_accounts),
+                  //   title: const Text("Customer Order",style: TextStyle(
+                  //     fontSize: 14,          // ⬇ reduced from 18
+                  //
+                  //   ),),
+                  //   onTap: () {
+                  //     Get.toNamed(AppRoutes.customerOrderView);
+                  //   },
+                  // ),
+                ],
+              ),
+
               /// 🔹 Customer Management
               ExpansionTile(
                 leading: const Icon(Icons.people_alt),
