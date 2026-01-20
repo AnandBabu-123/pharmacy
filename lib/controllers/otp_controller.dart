@@ -25,14 +25,14 @@ class OtpController extends GetxController {
     email = Get.arguments['email'];
     phoneNumber = Get.arguments['phone'];
 
-    print("📩 OTP SCREEN RECEIVED EMAIL: $email");
-    print("📱 OTP SCREEN RECEIVED PHONE: $phoneNumber");
+    print(" OTP SCREEN RECEIVED EMAIL: $email");
+    print(" OTP SCREEN RECEIVED PHONE: $phoneNumber");
   }
 
   /// SEND EMAIL OTP
   Future<void> sendEmailOtp() async {
     try {
-      print("📤 SEND EMAIL OTP → $email");
+      print(" SEND EMAIL OTP → $email");
 
       Map<String, dynamic> data = {
         "email": email,
@@ -41,10 +41,10 @@ class OtpController extends GetxController {
 
       var response = await apiCalls.postMethod(RouteUrls.sendEmailOTP, data);
 
-      print("✅ EMAIL OTP SENT RESPONSE: ${response.data}");
+      print(" EMAIL OTP SENT RESPONSE: ${response.data}");
       Get.snackbar("Success", "OTP sent to $email");
     } on DioException catch (e) {
-      print("❌ EMAIL OTP ERROR: ${e.response?.data}");
+      print(" EMAIL OTP ERROR: ${e.response?.data}");
       Get.snackbar(
         "Error",
         e.response?.data['message']?.toString() ??
@@ -56,7 +56,7 @@ class OtpController extends GetxController {
   /// VERIFY EMAIL OTP
   Future<void> verifyEmailOtp() async {
     try {
-      print("📤 VERIFY EMAIL OTP → $email | OTP: $emailOtp");
+      print(" VERIFY EMAIL OTP → $email | OTP: $emailOtp");
 
       Map<String, dynamic> data = {
         "otp": emailOtp,
@@ -65,10 +65,10 @@ class OtpController extends GetxController {
 
       var response = await apiCalls.postMethod(RouteUrls.verifyEmailOTP, data);
 
-      print("✅ EMAIL VERIFIED RESPONSE: ${response.data}");
+      print(" EMAIL VERIFIED RESPONSE: ${response.data}");
       Get.snackbar("Success", "Email verified successfully");
     } on DioException catch (e) {
-      print("❌ EMAIL VERIFY ERROR: ${e.response?.data}");
+      print(" EMAIL VERIFY ERROR: ${e.response?.data}");
       Get.snackbar(
         "Error",
         e.response?.data['message']?.toString() ??
@@ -87,10 +87,10 @@ class OtpController extends GetxController {
 
       var response = await apiCalls.postMethod(RouteUrls.mobileOTP, data);
 
-      print("✅ MOBILE OTP SENT RESPONSE: ${response.data}");
+      print(" MOBILE OTP SENT RESPONSE: ${response.data}");
       Get.snackbar("Success", "OTP sent to $phoneNumber");
     } on DioException catch (e) {
-      print("❌ MOBILE OTP ERROR: ${e.response?.data}");
+      print(" MOBILE OTP ERROR: ${e.response?.data}");
       Get.snackbar(
         "Error",
         e.response?.data['message']?.toString() ??
@@ -110,10 +110,10 @@ class OtpController extends GetxController {
 
       var response = await apiCalls.postMethod(RouteUrls.mobileOTP, data);
 
-      print("✅ MOBILE VERIFIED RESPONSE: ${response.data}");
+      print(" MOBILE VERIFIED RESPONSE: ${response.data}");
       Get.snackbar("Success", "Mobile number verified");
     } on DioException catch (e) {
-      print("❌ MOBILE VERIFY ERROR: ${e.response?.data}");
+      print(" MOBILE VERIFY ERROR: ${e.response?.data}");
       Get.snackbar(
         "Error",
         e.response?.data['message']?.toString() ??

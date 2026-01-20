@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,14 +20,8 @@ import '../model/pharmacy_storemodel.dart';
 import '../model/purchase_item_model.dart';
 import '../model/report_invoice_data.dart';
 import '../model/user_pharmacy_model.dart';
-
-import 'dart:io';
 import 'package:dio/dio.dart' as d;
 import 'dart:core';
-
-import 'manual_stock_item_form.dart';
-
-
 
 class AddPharmacyController extends GetxController {
   final ApiCalls apiCalls = ApiCalls();
@@ -261,21 +254,6 @@ class AddPharmacyController extends GetxController {
     searchedItems.clear();
   }
 
-  // form.batchNo.text = item.hsnGroup ?? "";
-
-
-  // void selectItem(ItemSearchModel item, int index) {
-  //   debugPrint("🎯 Selected Item: ${item.itemName}");
-  //
-  //   itemNameCtrls[index].text = item.itemName;
-  //   itemCodeCtrls[index].text = item.itemCode ?? "";
-  //   manufacturerCtrls[index].text = item.manufacturer ?? "";
-  //   brandCtrls[index].text = item.brand ?? "";
-  //   gstCtrls[index].text = item.gst?.toString() ?? "";
-  //   hsnCtrls[index].text = item.hsnGroup ?? "";
-  //
-  //   searchedItems.clear();
-  // }
   void addItem() {
     final index = itemIndexes.length;
     itemIndexes.add(index);
@@ -464,8 +442,6 @@ class AddPharmacyController extends GetxController {
   }
 
 
-
-
   Future<void> pickFiles() async {
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
@@ -572,9 +548,6 @@ class AddPharmacyController extends GetxController {
       isUploading.value = false;
     }
   }
-
-
-
 
 
 
@@ -1242,9 +1215,6 @@ class AddPharmacyController extends GetxController {
       isLoading.value = false;
     }
   }
-
-
-
 
 }
 

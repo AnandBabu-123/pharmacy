@@ -60,15 +60,15 @@ class UserDetailsController extends GetxController {
         "storeId": selectedStore.value!.id, // 👈 from dropdown
       };
 
-      debugPrint("📤 ADD USER BODY: $data");
+      debugPrint(" ADD USER BODY: $data");
 
       final response = await apiCalls.postMethod(
         RouteUrls.addStoreUser,
         data,
       );
 
-      debugPrint("📥 STATUS: ${response.statusCode}");
-      debugPrint("📥 RESPONSE: ${response.data}");
+      debugPrint("STATUS: ${response.statusCode}");
+      debugPrint(" RESPONSE: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar("Success", "User added successfully");
@@ -86,8 +86,8 @@ class UserDetailsController extends GetxController {
         );
       }
     } catch (e, s) {
-      debugPrint("❌ ADD USER ERROR: $e");
-      debugPrint("🧵 STACKTRACE:\n$s");
+      debugPrint(" ADD USER ERROR: $e");
+      debugPrint(" STACKTRACE:\n$s");
       Get.snackbar("Error", "Something went wrong");
     } finally {
       isLoading.value = false;
@@ -145,7 +145,7 @@ class UserDetailsController extends GetxController {
         );
       }
     } catch (e, stack) {
-      debugPrint("❌ EXCEPTION: $e");
+      debugPrint(" EXCEPTION: $e");
       debugPrint("STACKTRACE: $stack");
       Get.snackbar(
         "Error",

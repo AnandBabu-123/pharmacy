@@ -70,7 +70,7 @@ class RetailerPurchaseController extends GetxController {
   }) async {
     /// 🔹 SAFETY CHECK
     if (selectedStore.value == null) {
-      debugPrint("❌ selectedStore is null");
+      debugPrint(" selectedStore is null");
       return;
     }
 
@@ -104,25 +104,25 @@ class RetailerPurchaseController extends GetxController {
       /// 🔹 API CALL
       final res = await apiCalls.getMethod(url);
 
-      debugPrint("📥 Status Code: ${res.statusCode}");
-      debugPrint("📥 Response Type: ${res.data.runtimeType}");
+      debugPrint(" Status Code: ${res.statusCode}");
+      debugPrint(" Response Type: ${res.data.runtimeType}");
 
       if (res.statusCode == 200 && res.data != null) {
         /// 🔹 HANDLE STRING / MAP RESPONSE
         final Map<String, dynamic> json =
         res.data is String ? jsonDecode(res.data) : res.data;
 
-        debugPrint("📥 Raw JSON: ${jsonEncode(json)}");
+        debugPrint(" Raw JSON: ${jsonEncode(json)}");
 
         /// 🔹 PARSE MODEL
         final RetailerPurchaseModel model =
         RetailerPurchaseModel.fromJson(json);
 
-        debugPrint("📦 Model Status: ${model.status}");
-        debugPrint("📦 Message: ${model.message}");
-        debugPrint("📦 Current Page: ${model.currentPage}");
-        debugPrint("📦 Total Pages: ${model.totalPages}");
-        debugPrint("📦 Data Length: ${model.data?.length}");
+        debugPrint(" Model Status: ${model.status}");
+        debugPrint(" Message: ${model.message}");
+        debugPrint(" Current Page: ${model.currentPage}");
+        debugPrint(" Total Pages: ${model.totalPages}");
+        debugPrint("Data Length: ${model.data?.length}");
 
         /// 🔹 EXTRACT STOCK ITEMS SAFELY
         final List<RetailerStockItem> newItems =
@@ -133,7 +133,7 @@ class RetailerPurchaseController extends GetxController {
                 .toList() ??
                 <RetailerStockItem>[];
 
-        debugPrint("📦 New stock items fetched: ${newItems.length}");
+        debugPrint(" New stock items fetched: ${newItems.length}");
 
         /// 🔹 ADD TO LIST
         stockResults.addAll(newItems);
@@ -142,14 +142,14 @@ class RetailerPurchaseController extends GetxController {
         currentPage.value = model.currentPage ?? page;
         totalPages.value = model.totalPages ?? 1;
 
-        debugPrint("✅ Total items in list: ${stockResults.length}");
+        debugPrint(" Total items in list: ${stockResults.length}");
         debugPrint(
-          "📄 Page ${currentPage.value + 1} of ${totalPages.value}",
+          " Page ${currentPage.value + 1} of ${totalPages.value}",
         );
       }
     } catch (e, stack) {
-      debugPrint("❌ Search Error: $e");
-      debugPrint("🧵 StackTrace: $stack");
+      debugPrint(" Search Error: $e");
+      debugPrint(" StackTrace: $stack");
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -169,7 +169,7 @@ class RetailerPurchaseController extends GetxController {
         businessTypes.value = List<String>.from(res.data);
       }
     } catch (e) {
-      debugPrint("❌ BusinessType Error: $e");
+      debugPrint(" BusinessType Error: $e");
     }
   }
 
@@ -200,7 +200,7 @@ class RetailerPurchaseController extends GetxController {
             .toList();
       }
     } catch (e) {
-      debugPrint("❌ Store API Error: $e");
+      debugPrint(" Store API Error: $e");
     } finally {
       isLoadingStore.value = false;
     }

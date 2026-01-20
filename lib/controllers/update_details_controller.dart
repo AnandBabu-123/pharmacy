@@ -142,7 +142,7 @@ class UpdateDetailsController extends GetxController {
         formData,
       );
 
-      debugPrint("📥 Upload Response: ${response.data}");
+      debugPrint(" Upload Response: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         if (response.data['status'] == true) {
@@ -157,7 +157,7 @@ class UpdateDetailsController extends GetxController {
         Get.snackbar("Error", "Failed to upload documents");
       }
     } catch (e) {
-      debugPrint("❌ uploadDocuments error: $e");
+      debugPrint(" uploadDocuments error: $e");
       Get.snackbar("Error", "Something went wrong");
     } finally {
       isLoading.value = false;
@@ -199,7 +199,7 @@ class UpdateDetailsController extends GetxController {
 
       };
 
-      debugPrint("📦 REQUEST BODY:");
+      debugPrint(" REQUEST BODY:");
       debugPrint(const JsonEncoder.withIndent('  ').convert(data));
 
       final response = await apiCalls.putMethod(
@@ -207,7 +207,7 @@ class UpdateDetailsController extends GetxController {
         data,
       );
 
-      debugPrint("📥 RESPONSE:");
+      debugPrint(" RESPONSE:");
       debugPrint(response.data.toString());
 
       if (response.statusCode == 200 && response.data != null) {
@@ -239,7 +239,7 @@ class UpdateDetailsController extends GetxController {
         Get.snackbar("Error", "Failed to update store");
       }
     } catch (e) {
-      debugPrint("❌ updateStoreDetails error: $e");
+      debugPrint(" updateStoreDetails error: $e");
       Get.snackbar("Error", "Something went wrong");
     } finally {
       isLoading.value = false;
@@ -299,7 +299,7 @@ class UpdateDetailsController extends GetxController {
         }
       }
     } catch (e) {
-      debugPrint("❌ fetchStoresFromApi error: $e");
+      debugPrint(" fetchStoresFromApi error: $e");
     } finally {
       isLoading.value = false;
     }
@@ -343,7 +343,7 @@ class UpdateDetailsController extends GetxController {
     /// 🔹 SAVE SELECTED STORE ID
     await prefs.saveStoredUserId(store.userIdStoreId);
 
-    debugPrint("💾 Stored Selected userIdStoreId => ${store.userIdStoreId}");
+    debugPrint(" Stored Selected userIdStoreId => ${store.userIdStoreId}");
   }
 
 

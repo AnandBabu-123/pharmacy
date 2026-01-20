@@ -127,11 +127,11 @@ class SalesInVoiceController extends GetxController{
         saleGstList.value = model.saleGst ?? [];
         purchaseGstList.value = model.purchaseGst ?? [];
 
-        debugPrint("✅ Sale GST: ${saleGstList.length}");
-        debugPrint("✅ Purchase GST: ${purchaseGstList.length}");
+        debugPrint(" Sale GST: ${saleGstList.length}");
+        debugPrint(" Purchase GST: ${purchaseGstList.length}");
       }
     } catch (e, s) {
-      debugPrint("❌ GST Report Error: $e");
+      debugPrint(" GST Report Error: $e");
       debugPrint("$s");
     } finally {
       isLoading.value = false;
@@ -251,12 +251,12 @@ class SalesInVoiceController extends GetxController{
         Get.snackbar("Error", "Save failed");
       }
     } on DioException catch (e) {
-      debugPrint("❌ STATUS: ${e.response?.statusCode}");
-      debugPrint("❌ DATA: ${e.response?.data}");
-      debugPrint("❌ MESSAGE: ${e.message}");
+      debugPrint(" STATUS: ${e.response?.statusCode}");
+      debugPrint(" DATA: ${e.response?.data}");
+      debugPrint(" MESSAGE: ${e.message}");
       Get.snackbar("Error", "API Error");
     } catch (e, s) {
-      debugPrint("❌ ERROR: $e");
+      debugPrint(" ERROR: $e");
       debugPrint("STACK: $s");
       Get.snackbar("Error", "Unexpected Error");
     } finally {
@@ -455,8 +455,8 @@ class SalesInVoiceController extends GetxController{
         "${RouteUrls.searchManualStockByName}?itemName=$itemName",
       );
 
-      debugPrint("⬅ Status Code: ${response.statusCode}");
-      debugPrint("⬅ Response: ${response.data}");
+      debugPrint(" Status Code: ${response.statusCode}");
+      debugPrint(" Response: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final List list = response.data is String
@@ -490,8 +490,8 @@ class SalesInVoiceController extends GetxController{
         // form.hsn.text = item.hsnGroup ?? "";
       }
     } catch (e, s) {
-      debugPrint("❌ Item Search Error: $e");
-      debugPrint("🧵 $s");
+      debugPrint(" Item Search Error: $e");
+      debugPrint(" $s");
 
       form.clear();
       form.itemName.text = itemName;
@@ -532,7 +532,7 @@ class SalesInVoiceController extends GetxController{
 
       }
     } catch (e, s) {
-      print("❌ Dropdown API error: $e");
+      print(" Dropdown API error: $e");
       print("$s");
     }
   }
@@ -649,13 +649,13 @@ class SalesInVoiceController extends GetxController{
           orderResponse.value = OrderResponse.fromJson(data[0]);
 
           debugPrint(
-              "✅ Order ID: ${orderResponse.value?.orderHdr?.orderId}");
+              " Order ID: ${orderResponse.value?.orderHdr?.orderId}");
           debugPrint(
-              "✅ Customer ID: ${orderResponse.value?.orderHdr?.customerId}");
+              " Customer ID: ${orderResponse.value?.orderHdr?.customerId}");
           debugPrint(
-              "✅ Retailer ID: ${orderResponse.value?.orderHdr?.retailerId}");
+              " Retailer ID: ${orderResponse.value?.orderHdr?.retailerId}");
           debugPrint(
-              "✅ Order Status: ${orderResponse.value?.orderHdr?.orderStatus}");
+              " Order Status: ${orderResponse.value?.orderHdr?.orderStatus}");
 
           Get.snackbar("Success", "Order details fetched successfully");
         } else {
@@ -665,12 +665,12 @@ class SalesInVoiceController extends GetxController{
         Get.snackbar("Error", "Server error: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      debugPrint("❌ DIO ERROR: ${e.message}");
-      debugPrint("❌ RESPONSE: ${e.response?.data}");
+      debugPrint(" DIO ERROR: ${e.message}");
+      debugPrint(" RESPONSE: ${e.response?.data}");
       Get.snackbar("Error", "Network error occurred");
     } catch (e, s) {
-      debugPrint("❌ UNEXPECTED ERROR: $e");
-      debugPrint("❌ STACKTRACE: $s");
+      debugPrint(" UNEXPECTED ERROR: $e");
+      debugPrint(" STACKTRACE: $s");
       Get.snackbar("Error", "Something went wrong");
     } finally {
       isLoading.value = false;
@@ -746,14 +746,14 @@ class SalesInVoiceController extends GetxController{
         }),
       };
 
-      debugPrint("📤 REQUEST BODY: $body");
+      debugPrint(" REQUEST BODY: $body");
 
       final response = await dio.post(
         "sale/add",
         data: body,
       );
 
-      debugPrint("📥 Upload Response: ${response.data}");
+      debugPrint(" Upload Response: ${response.data}");
 
       Get.snackbar(
         "Success",
@@ -761,7 +761,7 @@ class SalesInVoiceController extends GetxController{
         backgroundColor: Colors.green.shade100,
       );
     } catch (e, s) {
-      debugPrint("❌ API ERROR: $e");
+      debugPrint(" API ERROR: $e");
       debugPrint("$s");
 
       Get.snackbar(
@@ -816,14 +816,14 @@ class SalesInVoiceController extends GetxController{
         }).toList(),
       };
 
-      debugPrint("📤 REQUEST BODY: $body");
+      debugPrint(" REQUEST BODY: $body");
 
       final response = await dio.post(
         "stock/add-stock-manually",
         data: body,
       );
 
-      debugPrint("📥 Upload Response: ${response.data}");
+      debugPrint(" Upload Response: ${response.data}");
 
       Get.snackbar(
         "Success",
@@ -831,7 +831,7 @@ class SalesInVoiceController extends GetxController{
         backgroundColor: Colors.green.shade100,
       );
     } catch (e, s) {
-      debugPrint("❌ API ERROR: $e");
+      debugPrint(" API ERROR: $e");
       debugPrint("$s");
 
       Get.snackbar(

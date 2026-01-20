@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../data/api_calls.dart';
 import '../data/route_urls.dart';
 import '../data/shared_preferences_data.dart';
@@ -45,6 +44,11 @@ class DashboardController extends GetxController {
   final townController = TextEditingController();
 
   var isPincodeLoading = false.obs;
+  var isVerified = false.obs;
+  var isActiveStore = false.obs;
+  var isVerifiedStore = false.obs;
+
+  final RxBool _canEdit = true.obs;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
@@ -55,21 +59,6 @@ class DashboardController extends GetxController {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController storeId = TextEditingController();
   final TextEditingController storeName = TextEditingController();
-
-
-
-  var isVerified = false.obs;
-
-  var isActiveStore = false.obs;
-  var isVerifiedStore = false.obs;
-
-
-
-
-
-  final RxBool _canEdit = true.obs;
-
-
 
 
   final storeNameCtrl = TextEditingController();
