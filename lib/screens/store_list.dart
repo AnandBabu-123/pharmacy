@@ -147,10 +147,20 @@ class StoreList extends StatelessWidget {
     }
 
     // 🔹 Preselect store category if list is loaded
-    final preselectedCategory = controller.storeCategories.firstWhereOrNull(
-          (c) => c.storeCategoryId == store.type,
+    // final preselectedCategory = controller.storeCategories.firstWhereOrNull(
+    //       (c) => c.storeCategoryId == store.type,
+    // );
+    // controller.selectedStoreCategory.value = preselectedCategory;
+
+    // 🔹 Preselect business type from store data
+    final preselectedBusinessType =
+    controller.allBusinessTypes.firstWhereOrNull(
+          (b) => b.businessTypeId == store.storeBusinessType,
     );
-    controller.selectedStoreCategory.value = preselectedCategory;
+
+    controller.selectedBusinessType.value = preselectedBusinessType;
+
+
 
     // 🔹 Local controllers
     final storeNameCtrl = TextEditingController(text: store.name);
