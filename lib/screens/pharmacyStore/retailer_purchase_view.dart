@@ -74,6 +74,7 @@ class RetailerPurchaseView extends StatelessWidget {
                 ),
 
 
+
                 const SizedBox(width: 8),
 
                 /// 🏢 Business Type Dropdown
