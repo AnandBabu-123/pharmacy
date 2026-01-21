@@ -12,7 +12,11 @@ class RetailerPurchaseController extends GetxController {
   final ApiCalls apiCalls = ApiCalls();
   final SharedPreferencesData prefs = SharedPreferencesData();
   /// 🔹 Controllers
-  final locationCtrl = TextEditingController();
+
+  final TextEditingController locationCtrl = TextEditingController();
+
+  final RxList<String> locationList = <String>[].obs;
+  final RxBool isLocationLoading = false.obs;
 
   /// 🔹 Dropdown values
   var businessTypes = <String>[].obs;
@@ -61,6 +65,27 @@ class RetailerPurchaseController extends GetxController {
       page: currentPage.value + 1,
       isLoadMore: true,
     );
+  }
+
+  Future<void> fetchLocations() async {
+    try {
+      isLocationLoading.value = true;
+      await apiCalls.initializeDio();
+
+      final response = await apiCalls.getMethod(
+        "http://3.111.125.81/store/getStoreLocation?storeCategory=DC",
+      );
+
+      final List data = response.data;
+      locationList.value =
+          data.where((e) => e != null && e.toString().isNotEmpty)
+              .map((e) => e.toString())
+              .toList();
+    } catch (e) {
+      print("Location fetch error: $e");
+    } finally {
+      isLocationLoading.value = false;
+    }
   }
 
 

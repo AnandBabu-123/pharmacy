@@ -139,95 +139,277 @@ class CustomerOrderView extends StatelessWidget {
 
               const SizedBox(height: 16),
               /// 🔹 ORDER DETAILS VIEW
-              Obx(() {
-                final data = controller.orderResponse.value;
+              // Obx(() {
+              //   final data = controller.orderResponse.value;
+              //
+              //   if (data == null) {
+              //     return const SizedBox(); // nothing before search
+              //   }
+              //
+              //   return Card(
+              //     elevation: 2,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(12),
+              //       child: Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         children: [
+              //
+              //           /// HEADER
+              //           const Text(
+              //             "Order Details",
+              //             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              //           ),
+              //           const Divider(),
+              //
+              //           _detailRow("Order ID", data.orderHdr?.orderId),
+              //           _detailRow("Date", data.orderHdr?.orderDate),
+              //           _detailRow("Status", data.orderHdr?.orderStatus),
+              //           _detailRow("Payment", data.orderHdr?.paymentStatus),
+              //           _detailRow("Delivery", data.orderHdr?.deliveryMethod),
+              //
+              //           const SizedBox(height: 12),
+              //
+              //           /// 🔹 ITEMS LIST
+              //           if (data.orderHdr?.customerRetailerOrderDetailsList != null)
+              //             Column(
+              //               crossAxisAlignment: CrossAxisAlignment.start,
+              //               children: [
+              //                 const Text(
+              //                   "Items",
+              //                   style:
+              //                   TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              //                 ),
+              //                 const SizedBox(height: 8),
+              //
+              //                 ...data.orderHdr!.customerRetailerOrderDetailsList!
+              //                     .map(
+              //                       (item) => Container(
+              //                     margin: const EdgeInsets.only(bottom: 8),
+              //                     padding: const EdgeInsets.all(8),
+              //                     decoration: BoxDecoration(
+              //                       border: Border.all(color: Colors.grey.shade300),
+              //                       borderRadius: BorderRadius.circular(8),
+              //                     ),
+              //                     child: Column(
+              //                       crossAxisAlignment: CrossAxisAlignment.start,
+              //                       children: [
+              //                         _detailRow("Item", item.itemName),
+              //                         _detailRow("Qty", item.orderQty?.toString()),
+              //                         _detailRow("MRP", item.mrp?.toString()),
+              //                         _detailRow("Discount", item.discount?.toString()),
+              //                         _detailRow("GST", item.gst?.toString()),
+              //                         _detailRow("Manufacturer", item.manufactureName),
+              //                         // _detailRow("Brand", item.br?.toString()),
+              //                         _detailRow(
+              //                             "Total", item.totalAmount?.toString()),
+              //                       ],
+              //                     ),
+              //                   ),
+              //                 )
+              //                     .toList(),
+              //               ],
+              //             ),
+              //           SizedBox(height: 10,),
+              //           Text("Store Info"),
+              //           SizedBox(height: 4,),
+              //           _detailRow("Name", data.store?.name),
+              //           _detailRow("Location", data.store?.location),
+              //           _detailRow("Contact", data.store?.ownerContact),
+              //           _detailRow("Email", data.store?.ownerEmail),
+              //
+              //
+              //         ],
+              //       ),
+              //     ),
+              //   );
+              // }),
 
-                if (data == null) {
-                  return const SizedBox(); // nothing before search
-                }
+          Obx(() {
+            final data = controller.orderResponse.value;
 
-                return Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+            if (data == null) {
+              return const SizedBox();
+            }
 
-                        /// HEADER
-                        const Text(
-                          "Order Details",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const Divider(),
+            return Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-                        _detailRow("Order ID", data.orderHdr?.orderId),
-                        _detailRow("Date", data.orderHdr?.orderDate),
-                        _detailRow("Status", data.orderHdr?.orderStatus),
-                        _detailRow("Payment", data.orderHdr?.paymentStatus),
-                        _detailRow("Delivery", data.orderHdr?.deliveryMethod),
-
-                        const SizedBox(height: 12),
-
-                        /// 🔹 ITEMS LIST
-                        if (data.orderHdr?.customerRetailerOrderDetailsList != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Items",
-                                style:
-                                TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 8),
-
-                              ...data.orderHdr!.customerRetailerOrderDetailsList!
-                                  .map(
-                                    (item) => Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey.shade300),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _detailRow("Item", item.itemName),
-                                      _detailRow("Qty", item.orderQty?.toString()),
-                                      _detailRow("MRP", item.mrp?.toString()),
-                                      _detailRow("Discount", item.discount?.toString()),
-                                      _detailRow("GST", item.gst?.toString()),
-                                      _detailRow("Manufacturer", item.manufactureName),
-                                      // _detailRow("Brand", item.br?.toString()),
-                                      _detailRow(
-                                          "Total", item.totalAmount?.toString()),
-                                    ],
-                                  ),
-                                ),
-                              )
-                                  .toList(),
-                            ],
-                          ),
-                        SizedBox(height: 10,),
-                        Text("Store Info"),
-                        SizedBox(height: 4,),
-                        _detailRow("Name", data.store?.name),
-                        _detailRow("Location", data.store?.location),
-                        _detailRow("Contact", data.store?.ownerContact),
-                        _detailRow("Email", data.store?.ownerEmail),
-
-
-                      ],
+                    /// HEADER
+                    const Text(
+                      "Order Details",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                );
-              }),
 
-            ],
+                    const SizedBox(height: 8),
+
+                    /// 🔽 DROPDOWNS
+                    Obx(
+                          () =>
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 48,
+                                      child: DropdownButtonFormField<String>(
+                                        value: controller.selectedDeliveryStatus.value,
+                                        isExpanded: true,
+                                        decoration: const InputDecoration(
+                                          labelText: "Delivery Status",
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        items: controller.deliveryStatusList
+                                            .map(
+                                              (e) => DropdownMenuItem<String>(
+                                            value: e,
+                                            child: Text(
+                                              e,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        )
+                                            .toList(),
+                                        onChanged: (value) {
+                                          controller.selectedDeliveryStatus.value = value!;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 48,
+                                      child: DropdownButtonFormField<String>(
+                                        value: controller.selectedDeliveryPartner.value,
+                                        isExpanded: true,
+                                        decoration: const InputDecoration(
+                                          labelText: "Delivery Partner",
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        items: controller.deliveryPartnerList
+                                            .map(
+                                              (e) => DropdownMenuItem<String>(
+                                            value: e,
+                                            child: Text(
+                                              e,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        )
+                                            .toList(),
+                                        onChanged: (value) {
+                                          controller.selectedDeliveryPartner.value = value!;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+
+                    ),
+
+                    const Divider(),
+
+                    _detailRow("Order ID", data.orderHdr?.orderId),
+                    _detailRow("Date", data.orderHdr?.orderDate),
+                    _detailRow("Status", data.orderHdr?.orderStatus),
+                    _detailRow("Payment", data.orderHdr?.paymentStatus),
+                    _detailRow("Delivery", data.orderHdr?.deliveryMethod),
+
+                    const SizedBox(height: 12),
+
+                    /// ITEMS LIST
+                    if (data.orderHdr?.customerRetailerOrderDetailsList != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Items",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...data.orderHdr!.customerRetailerOrderDetailsList!.map(
+                                (item) => Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _detailRow("Item", item.itemName),
+                                  _detailRow("Qty", item.orderQty?.toString()),
+                                  _detailRow("MRP", item.mrp?.toString()),
+                                  _detailRow("Discount", item.discount?.toString()),
+                                  _detailRow("GST", item.gst?.toString()),
+                                  _detailRow(
+                                      "Manufacturer", item.manufactureName),
+                                  _detailRow(
+                                      "Total", item.totalAmount?.toString()),
+                                ],
+                              ),
+                            ),
+                          ).toList(),
+                        ],
+                      ),
+
+                    const SizedBox(height: 10),
+
+                    /// STORE INFO
+                    const Text(
+                      "Store Info",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    _detailRow("Name", data.store?.name),
+                    _detailRow("Location", data.store?.location),
+                    _detailRow("Contact", data.store?.ownerContact),
+                    _detailRow("Email", data.store?.ownerEmail),
+
+                    const SizedBox(height: 16),
+
+                    /// SUBMIT BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          controller.submitDeliveryStatus(
+                            orderId: data.orderHdr?.orderId ?? "",
+                          );
+                        },
+                        child: const Text("Submit"),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          })
+
+          ],
           ),
         ),
       ),

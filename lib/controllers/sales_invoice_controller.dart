@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:propertysearch/controllers/manual_stock_item_form.dart';
 import 'package:propertysearch/controllers/sales_item_form.dart';
 import 'package:propertysearch/model/gst_report_model.dart';
@@ -57,6 +57,24 @@ class SalesInVoiceController extends GetxController{
   RxString selectedOrderId = "".obs;
 
   RxBool isFilterExpanded = true.obs;
+
+  /// Dropdown values
+  final List<String> deliveryStatusList = [
+    "All",
+    "Completed",
+    "Pending",
+    "ReadyToDeliver",
+  ];
+
+  final List<String> deliveryPartnerList = [
+    "Delhivery",
+    "Delhivery1",
+  ];
+
+  /// Selected values
+  final RxString selectedDeliveryStatus = "Completed".obs;
+  final RxString selectedDeliveryPartner = "Delhivery".obs;
+
 
   @override
   void onInit() {
@@ -842,7 +860,37 @@ class SalesInVoiceController extends GetxController{
     }
   }
 
+  Future<void> submitDeliveryStatus({required String orderId}) async {
+    try {
+      isLoading.value = true;
+      await apiCalls.initializeDio();
 
+      final body = {
+        "orderId": orderId,
+        "deliveryStatus": selectedDeliveryStatus.value,
+        "deliveryPartner": selectedDeliveryPartner.value,
+      };
 
+      final Response response = await apiCalls.postMethod(
+        RouteUrls.postDeliveryStatus,
+        body,
+      );
+
+      /// ✅ FIX HERE
+      final responseData = response.data;
+
+      if (responseData != null && responseData["message"] != null) {
+        Get.snackbar(
+          "Info",
+          responseData["message"].toString(),
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      print("Submit Delivery Status Error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 }

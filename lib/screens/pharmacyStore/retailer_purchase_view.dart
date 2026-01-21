@@ -36,17 +36,44 @@ class RetailerPurchaseView extends StatelessWidget {
                 Expanded(
                   child: SizedBox(
                     height: 48,
-                    child: TextField(
-                      controller: controller.locationCtrl,
-                      decoration: const InputDecoration(
-                        labelText: "Location",
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
+                    child: Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return controller.locationList;
+                        }
+                        return controller.locationList.where(
+                              (option) => option
+                              .toLowerCase()
+                              .contains(textEditingValue.text.toLowerCase()),
+                        );
+                      },
+                      onSelected: (selection) {
+                        controller.locationCtrl.text = selection;
+                      },
+                      fieldViewBuilder:
+                          (context, textEditingController, focusNode, onFieldSubmitted) {
+                        return TextField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          onTap: () async {
+                            // fetch once
+                            if (controller.locationList.isEmpty) {
+                              await controller.fetchLocations();
+                            }
+                          },
+                          decoration: const InputDecoration(
+                            labelText: "Location",
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
+
+
                 const SizedBox(width: 8),
 
                 /// 🏢 Business Type Dropdown
