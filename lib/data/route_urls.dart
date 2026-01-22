@@ -39,6 +39,7 @@ static const String addPurchaseVoice ="purchase/add";
 static const String fetchInvoiceData= "purchase/report/get-purchase-invoice-details";
 static const String fetchSalesReport ="sale/report/get-sale-invoice-details";
 static const String postDeliveryStatus = "api/delivery-ready/add";
+static const String onlineOrder = "api/customer-store/customerstoreinfo-by-customer";
 
 
 }

@@ -73,7 +73,7 @@ class RetailerPurchaseController extends GetxController {
       await apiCalls.initializeDio();
 
       final response = await apiCalls.getMethod(
-        "http://3.111.125.81/store/getStoreLocation?storeCategory=DC",
+        "http://3.111.125.81/store/getStoreLocation?storeCategory=PH",
       );
 
       final List data = response.data;

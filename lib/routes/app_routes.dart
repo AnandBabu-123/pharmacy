@@ -14,6 +14,7 @@ import 'package:propertysearch/screens/pharmacyStore/get_rock_management.dart';
 import 'package:propertysearch/screens/pharmacyStore/get_sales_report.dart';
 import 'package:propertysearch/screens/pharmacyStore/gst_report_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/manual_stock_view.dart';
+import 'package:propertysearch/screens/pharmacyStore/online_order.dart';
 import 'package:propertysearch/screens/pharmacyStore/price_manage_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/purcahse_invoice_view.dart';
 import 'package:propertysearch/screens/pharmacyStore/purchase_invoice_screen.dart';
@@ -59,6 +60,7 @@ class AppRoutes {
    static const customerOrderView = "/customerOrderView";
    static const salesInvoiceReport = "/salesInvoiceReport";
    static const retailerPurchaseView ="/retailerPurchaseView";
+   static const onlineOrder = "/onlineOrder";
 
 
   static final routes = [
@@ -89,6 +91,7 @@ class AppRoutes {
     GetPage(name: customerOrderView, page: () => CustomerOrderView()),
     GetPage(name: salesInvoiceReport, page: () => SalesInvoiceReport()),
     GetPage(name: retailerPurchaseView, page: () => RetailerPurchaseView()),
+    GetPage(name: onlineOrder, page: () => OnlineOrder()),
 
   ];
 }

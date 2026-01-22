@@ -306,7 +306,7 @@ class AppDrawer extends StatelessWidget {
 
               ExpansionTile(
                 leading: const Icon(Icons.people_alt),
-                title: const Text("Retail PurChase",style: TextStyle(
+                title: const Text("Order Management",style: TextStyle(
                   fontSize: 16,          // ⬇ reduced from 18
                   fontWeight: FontWeight.w600,
                 ),),
@@ -362,6 +362,17 @@ class AppDrawer extends StatelessWidget {
                     ),),
                     onTap: () {
                       Get.toNamed(AppRoutes.customerOrderView);
+                    },
+                  ),
+
+                  ListTile(
+                    leading: const Icon(Icons.manage_accounts),
+                    title: const Text("Online Order",style: TextStyle(
+                      fontSize: 14,          // ⬇ reduced from 18
+
+                    ),),
+                    onTap: () {
+                      Get.toNamed(AppRoutes.onlineOrder);
                     },
                   ),
                 ],
