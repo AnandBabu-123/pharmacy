@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1️⃣ Checkout code
       - uses: actions/checkout@v4
 
       # 2️⃣ Set up JDK
@@ -28,13 +28,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
-      # 5️⃣ Build APK
+      # 5️⃣ Set ANDROID_SDK_ROOT environment variable
+      - name: Set ANDROID_SDK_ROOT
+        run: echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
+
+      # 6️⃣ Build APK
       - name: Build Debug APK
         run: |
           cd android
           ./gradlew assembleDebug
 
-      # 6️⃣ Upload APK as artifact (latest version)
+      # 7️⃣ Upload APK
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
